@@ -1,0 +1,3008 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>TMGame Admin Panel</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif}
+body{background:#f1f5f9;color:#0f172a}
+button{border:0;cursor:pointer;font-family:inherit}
+input,select,textarea{width:100%;padding:12px 14px;border:1px solid #cbd5e1;border-radius:12px;margin:6px 0;outline:none;font-size:15px}
+input:focus,select:focus,textarea:focus{border-color:#4f46e5;box-shadow:0 0 0 3px rgba(79,70,229,.15)}
+.hidden{display:none!important}
+button,.btn,.filter-btn,.side-btn,.menu{touch-action:manipulation;-webkit-tap-highlight-color:transparent}
+.spin{animation:tmSpin .8s linear infinite}
+@keyframes tmSpin{to{transform:rotate(360deg)}}
+.btn{padding:11px 16px;border-radius:11px;background:#4f46e5;color:#fff;font-weight:700;font-size:14px;transition:.15s}
+.btn:active{transform:scale(.97)}
+.btn.green{background:#16a34a}
+.btn.red{background:#dc2626}
+.btn.orange{background:#ea580c}
+.btn.dark{background:#1e293b}
+.btn.gray{background:#64748b}
+.btn.small{padding:7px 11px;font-size:12px}
+.btn.copy{background:#e0e7ff;color:#3730a3;padding:5px 9px;font-size:11px}
+.login-screen{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px;background:linear-gradient(135deg,#0f172a,#312e81)}
+.login-box{width:100%;max-width:400px;background:#fff;padding:32px;border-radius:24px;box-shadow:0 25px 50px rgba(0,0,0,.3)}
+.logo{color:#4f46e5;font-size:30px;font-weight:900}
+.login-title{font-size:22px;font-weight:800;margin:22px 0 12px}
+.error{color:#dc2626;font-size:13px;margin-top:10px}
+.header{height:64px;background:#fff;border-bottom:1px solid #e2e8f0;display:flex;align-items:center;justify-content:space-between;padding:0 18px;position:sticky;top:0;z-index:50}
+.header-left{display:flex;align-items:center;gap:12px}
+.menu{font-size:24px;background:none;color:#334155}
+.header-user{color:#64748b;font-size:13px;max-width:140px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.sidebar{position:fixed;top:64px;bottom:0;left:0;width:240px;background:#0f172a;padding:16px 12px;z-index:40;overflow-y:auto}
+.side-btn{width:100%;text-align:left;padding:13px 14px;margin-bottom:4px;border-radius:11px;background:transparent;color:#94a3b8;font-weight:600;font-size:14px}
+.side-btn:hover,.side-btn.active{background:#4f46e5;color:#fff}
+.main{margin-left:240px;padding:22px;max-width:1400px}
+.page{display:none}
+.page.active{display:block}
+.page-title{font-size:26px;font-weight:900;margin-bottom:20px}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:14px;margin-bottom:22px}
+.stat{background:#fff;border-radius:18px;padding:18px;box-shadow:0 4px 16px rgba(0,0,0,.04)}
+.stat-label{color:#64748b;font-size:13px;font-weight:600}
+.stat-value{font-size:24px;font-weight:900;margin-top:6px}
+.card{background:#fff;padding:20px;border-radius:18px;margin-bottom:18px;box-shadow:0 4px 16px rgba(0,0,0,.04)}
+.card-title{font-size:18px;font-weight:800;margin-bottom:14px}
+.form-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
+.full{grid-column:1/-1}
+.form-label{font-size:13px;font-weight:700;color:#334155;margin-bottom:2px;display:block}
+.table-wrap{width:100%;overflow-x:auto}
+table{width:100%;border-collapse:collapse;min-width:800px}
+th,td{padding:12px 10px;border-bottom:1px solid #e2e8f0;text-align:left;font-size:13px;vertical-align:middle}
+th{background:#f8fafc;font-weight:800;color:#475569}
+.actions{display:flex;gap:6px;flex-wrap:wrap}
+.status{display:inline-block;padding:5px 10px;border-radius:20px;font-size:11px;font-weight:700}
+.pending{background:#fef3c7;color:#92400e}
+.approved,.paid,.active-status,.resolved{background:#dcfce7;color:#166534}
+.rejected,.blocked,.closed{background:#fee2e2;color:#991b1b}
+.inprogress{background:#dbeafe;color:#1e40af}
+.filter-row{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px}
+.filter-btn{padding:9px 14px;border-radius:20px;background:#f1f5f9;color:#475569;font-weight:700;font-size:12px}
+.filter-btn.active{background:#4f46e5;color:#fff}
+.id-box{display:flex;flex-direction:column;gap:4px;min-width:110px}
+.id-text{word-break:break-all;font-size:11px}
+.user-info{display:flex;flex-direction:column;gap:3px}
+.user-name{font-weight:800}
+.user-email{color:#64748b;font-size:11px}
+.money{font-weight:800}
+.tournament-admin{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:16px}
+.t-card{background:#fff;border-radius:18px;overflow:hidden;box-shadow:0 4px 16px rgba(0,0,0,.05)}
+.t-card img{width:100%;aspect-ratio:16/9;object-fit:cover;background:#e2e8f0}
+.t-body{padding:16px}
+.badges{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px}
+.badge{background:#e0e7ff;color:#3730a3;padding:5px 9px;border-radius:20px;font-size:11px;font-weight:700}
+.info-box{background:#f8fafc;border-radius:14px;padding:14px;margin-bottom:16px;color:#475569;line-height:1.5;font-size:14px}
+.empty{padding:28px;text-align:center;color:#64748b}
+.modal-bg{position:fixed;inset:0;background:rgba(15,23,42,.55);display:flex;align-items:flex-end;justify-content:center;z-index:200}
+.modal{width:100%;max-width:520px;max-height:90vh;overflow:auto;background:#fff;border-radius:24px 24px 0 0;padding:24px}
+.modal-title{font-size:20px;font-weight:900;margin-bottom:16px}
+.toggle-row{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:14px 0;border-bottom:1px solid #e2e8f0}
+.toggle-row:last-child{border-bottom:0}
+.toggle-label{font-weight:700;font-size:15px}
+.toggle-status{font-size:12px;font-weight:700;padding:4px 10px;border-radius:20px}
+.toggle-status.on{background:#dcfce7;color:#166534}
+.toggle-status.off{background:#fee2e2;color:#991b1b}
+.reason-box{margin-top:8px;display:none}
+.reason-box.show{display:block}
+@media(max-width:900px){
+.sidebar{width:0;overflow:hidden;padding:16px 0;transition:.25s}
+.sidebar.open{width:240px;padding:16px 12px}
+.main{margin-left:0;padding:14px}
+.form-grid{grid-template-columns:1fr}
+}
+
+/* Premium visual layer — functionality and selectors remain unchanged */
+:root{
+  --ink:#10172b;
+  --muted:#6b7690;
+  --line:#e7eaf2;
+  --surface:#ffffff;
+  --surface-soft:#f7f8fc;
+  --brand:#5b4cf0;
+  --brand-deep:#3f32bf;
+  --brand-soft:#eeedff;
+  --navy:#11182d;
+  --shadow:0 14px 34px rgba(26,34,72,.07);
+  --shadow-hover:0 20px 42px rgba(26,34,72,.13);
+}
+html{background:#f5f6fb;scroll-behavior:smooth}
+body{
+  background:
+    radial-gradient(circle at 92% 0%,rgba(91,76,240,.08),transparent 28rem),
+    linear-gradient(135deg,#f8f9fd 0%,#f2f4fa 100%);
+  color:var(--ink);
+  letter-spacing:-.01em;
+}
+body:before{
+  content:"";
+  position:fixed;
+  inset:0;
+  pointer-events:none;
+  opacity:.35;
+  background-image:linear-gradient(rgba(91,76,240,.025) 1px,transparent 1px),linear-gradient(90deg,rgba(91,76,240,.025) 1px,transparent 1px);
+  background-size:34px 34px;
+  mask-image:linear-gradient(to bottom,#000,transparent 78%);
+}
+button,input,select,textarea{transition:background-color .2s ease,border-color .2s ease,box-shadow .2s ease,transform .2s ease,opacity .2s ease}
+button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible{outline:3px solid rgba(91,76,240,.2);outline-offset:2px}
+input,select,textarea{
+  border-color:#dfe3ed;
+  background:#fbfcfe;
+  color:var(--ink);
+  box-shadow:inset 0 1px 1px rgba(16,24,48,.02);
+}
+input::placeholder,textarea::placeholder{color:#9aa3b6}
+input:hover,select:hover,textarea:hover{border-color:#c9cfea}
+input:focus,select:focus,textarea:focus{
+  border-color:var(--brand);
+  background:#fff;
+  box-shadow:0 0 0 4px rgba(91,76,240,.12),0 8px 18px rgba(50,44,140,.05);
+}
+.btn{
+  background:linear-gradient(135deg,#6758ff,#4f3ed7);
+  border:1px solid rgba(63,50,191,.18);
+  border-radius:12px;
+  box-shadow:0 8px 16px rgba(79,62,215,.18);
+  letter-spacing:.01em;
+}
+.btn:hover{transform:translateY(-2px);box-shadow:0 12px 22px rgba(79,62,215,.25);filter:saturate(1.08)}
+.btn:active{transform:translateY(0) scale(.98);box-shadow:0 5px 10px rgba(79,62,215,.16)}
+.btn.green{background:linear-gradient(135deg,#22b66f,#139657);box-shadow:0 8px 16px rgba(19,150,87,.16)}
+.btn.red{background:linear-gradient(135deg,#f05c68,#d93647);box-shadow:0 8px 16px rgba(217,54,71,.16)}
+.btn.orange{background:linear-gradient(135deg,#f59b3d,#e36b20);box-shadow:0 8px 16px rgba(227,107,32,.16)}
+.btn.dark{background:linear-gradient(135deg,#293552,#172238);box-shadow:0 8px 16px rgba(23,34,56,.15)}
+.btn.gray{background:linear-gradient(135deg,#8893aa,#65718a);box-shadow:0 8px 16px rgba(101,113,138,.15)}
+.btn.copy{background:var(--brand-soft);color:var(--brand-deep);border:1px solid #ddd9ff;box-shadow:none}
+.btn.copy:hover{background:#e2dfff;box-shadow:none}
+.login-screen{
+  position:relative;
+  overflow:hidden;
+  background:
+    radial-gradient(circle at 15% 18%,rgba(128,115,255,.32),transparent 25rem),
+    radial-gradient(circle at 88% 86%,rgba(51,207,196,.16),transparent 24rem),
+    linear-gradient(135deg,#0d1428 0%,#191947 58%,#241b5d 100%);
+}
+.login-screen:before,.login-screen:after{
+  content:"";
+  position:absolute;
+  width:22rem;
+  height:22rem;
+  border:1px solid rgba(255,255,255,.1);
+  border-radius:50%;
+  pointer-events:none;
+}
+.login-screen:before{top:-9rem;right:-5rem;box-shadow:0 0 0 42px rgba(255,255,255,.025),0 0 0 84px rgba(255,255,255,.018)}
+.login-screen:after{bottom:-13rem;left:-7rem}
+.login-box{
+  position:relative;
+  z-index:1;
+  max-width:430px;
+  padding:38px;
+  border:1px solid rgba(255,255,255,.7);
+  border-radius:28px;
+  box-shadow:0 30px 80px rgba(0,0,0,.34),0 0 0 8px rgba(255,255,255,.04);
+  animation:panelIn .55s cubic-bezier(.2,.8,.2,1) both;
+}
+.logo{
+  background:linear-gradient(135deg,#6758ff,#36cfc2);
+  -webkit-background-clip:text;
+  background-clip:text;
+  color:transparent;
+  letter-spacing:-.045em;
+}
+.login-box>div:nth-child(2){color:#7d879c!important}
+.login-title{color:var(--ink);letter-spacing:-.035em}
+.header{
+  height:72px;
+  padding:0 24px;
+  border-bottom:1px solid rgba(226,229,239,.85);
+  background:rgba(255,255,255,.88);
+  box-shadow:0 8px 28px rgba(24,32,65,.05);
+  backdrop-filter:blur(18px);
+}
+.header-left{gap:15px}
+.menu{
+  width:38px;
+  height:38px;
+  border-radius:11px;
+  color:#4d5871;
+  background:#f3f4fa;
+  font-size:20px;
+}
+.menu:hover{background:var(--brand-soft);color:var(--brand)}
+.header .logo{font-size:21px!important}
+.header-user{
+  padding:8px 12px;
+  border:1px solid #e6e8f0;
+  border-radius:999px;
+  color:#59647b;
+  background:#fafbfe;
+}
+.sidebar{
+  top:72px;
+  width:256px;
+  padding:22px 14px;
+  background:
+    radial-gradient(circle at 100% 0%,rgba(109,91,255,.24),transparent 18rem),
+    linear-gradient(180deg,#121a32,#0c1326);
+  box-shadow:16px 0 34px rgba(13,19,40,.08);
+}
+.sidebar:before{
+  content:"CONTROL CENTER";
+  display:block;
+  padding:0 13px 14px;
+  color:#66728e;
+  font-size:10px;
+  font-weight:800;
+  letter-spacing:.16em;
+}
+.side-btn{
+  position:relative;
+  padding:12px 14px;
+  margin-bottom:5px;
+  color:#9ba6be;
+  border:1px solid transparent;
+  transition:all .2s ease;
+}
+.side-btn:hover{background:rgba(255,255,255,.07);color:#fff;transform:translateX(3px)}
+.side-btn.active{
+  color:#fff;
+  background:linear-gradient(100deg,rgba(103,88,255,.95),rgba(79,62,215,.76));
+  border-color:rgba(175,166,255,.2);
+  box-shadow:0 9px 18px rgba(49,37,151,.25);
+}
+.side-btn.active:before{
+  content:"";
+  position:absolute;
+  left:-14px;
+  top:10px;
+  bottom:10px;
+  width:3px;
+  border-radius:0 3px 3px 0;
+  background:#8f86ff;
+}
+.main{margin-left:256px;padding:32px 32px 44px;max-width:1480px}
+.page.active{animation:pageIn .35s ease both}
+.page-title{
+  position:relative;
+  display:flex;
+  align-items:center;
+  gap:13px;
+  margin-bottom:24px;
+  color:#151d35;
+  font-size:29px;
+  letter-spacing:-.045em;
+}
+.page-title:before{content:"";width:5px;height:29px;border-radius:5px;background:linear-gradient(#6c5cff,#37cbbb);box-shadow:0 5px 12px rgba(91,76,240,.24)}
+.stats{gap:16px;margin-bottom:26px}
+.stat{
+  position:relative;
+  overflow:hidden;
+  padding:20px;
+  border:1px solid rgba(226,229,239,.9);
+  border-radius:19px;
+  box-shadow:var(--shadow);
+  transition:transform .24s ease,box-shadow .24s ease;
+}
+.stat:after{
+  content:"";
+  position:absolute;
+  right:-22px;
+  bottom:-25px;
+  width:84px;
+  height:84px;
+  border:1px solid rgba(91,76,240,.08);
+  border-radius:50%;
+  box-shadow:0 0 0 12px rgba(91,76,240,.025);
+}
+.stat:hover{transform:translateY(-4px);box-shadow:var(--shadow-hover)}
+.stat-label{color:#7b8498;font-size:12px;letter-spacing:.04em;text-transform:uppercase}
+.stat-value{color:#151d35;font-size:27px;letter-spacing:-.04em}
+.card,.t-card{
+  border:1px solid rgba(226,229,239,.88);
+  box-shadow:var(--shadow);
+}
+.card{padding:23px;border-radius:20px;margin-bottom:20px}
+.card-title{color:#1b2440;letter-spacing:-.025em}
+.form-label{color:#68738b;letter-spacing:.02em}
+.table-wrap{border:1px solid #edf0f5;border-radius:15px}
+table{min-width:820px}
+th,td{padding:14px 13px;border-bottom-color:#edf0f5}
+th{
+  background:#f8f9fc;
+  color:#69748a;
+  font-size:11px;
+  letter-spacing:.08em;
+  text-transform:uppercase;
+}
+tbody tr{transition:background .18s ease}
+tbody tr:hover{background:#fafaff}
+tbody tr:last-child td{border-bottom:0}
+.actions{gap:7px}
+.status{padding:6px 11px;letter-spacing:.02em}
+.pending{background:#fff4d6;color:#9a6700}
+.approved,.paid,.active-status,.resolved{background:#ddf8e9;color:#137145}
+.rejected,.blocked,.closed{background:#ffe3e6;color:#b3283d}
+.inprogress{background:#e3efff;color:#2455a6}
+.filter-row{gap:9px;margin-bottom:18px}
+.filter-btn{
+  border:1px solid #e5e8f0;
+  background:#f8f9fc;
+  color:#6c7790;
+  transition:all .2s ease;
+}
+.filter-btn:hover{border-color:#cfcaff;color:var(--brand);background:#f5f3ff}
+.filter-btn.active{border-color:var(--brand);background:linear-gradient(135deg,#6758ff,#4f3ed7);box-shadow:0 7px 14px rgba(79,62,215,.16)}
+.id-text{color:#59657c}
+.user-name{color:#1a2440}
+.user-email{color:#8a94a8}
+.money{color:#1e2b4a}
+.info-box{background:#f7f8fc;border:1px solid #eceef5;color:#64708a}
+.empty{color:#8993a7}
+.tournament-admin{gap:20px}
+.t-card{border-radius:20px;transition:transform .24s ease,box-shadow .24s ease}
+.t-card:hover{transform:translateY(-5px);box-shadow:var(--shadow-hover)}
+.t-card img{background:#e8eaf2}
+.t-body{padding:19px}
+.badge{background:var(--brand-soft);color:var(--brand-deep);border:1px solid #e1ddff}
+.modal-bg{align-items:center;padding:18px;background:rgba(9,14,31,.68);backdrop-filter:blur(8px)}
+.modal{
+  max-height:88vh;
+  border:1px solid rgba(255,255,255,.7);
+  border-radius:24px;
+  box-shadow:0 26px 70px rgba(0,0,0,.3);
+  animation:modalIn .3s ease both;
+}
+.toggle-row{border-bottom-color:#edf0f5}
+.toggle-status{letter-spacing:.08em}
+.toggle-status.on{background:#ddf8e9;color:#137145}
+.toggle-status.off{background:#ffe3e6;color:#b3283d}
+.reason-box{animation:pageIn .25s ease both}
+@keyframes panelIn{from{opacity:0;transform:translateY(18px) scale(.98)}to{opacity:1;transform:none}}
+@keyframes pageIn{from{opacity:0;transform:translateY(7px)}to{opacity:1;transform:none}}
+@keyframes modalIn{from{opacity:0;transform:translateY(12px) scale(.98)}to{opacity:1;transform:none}}
+@media(max-width:900px){
+  .header{padding:0 16px}
+  .sidebar{top:72px}
+  .main{padding:22px 16px 34px}
+  .page-title{font-size:25px}
+}
+@media(max-width:540px){
+  .login-box{padding:30px 22px;border-radius:24px}
+  .card{padding:18px;border-radius:18px}
+  .stats{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+  .stat{padding:15px}
+  .stat-value{font-size:23px}
+  .modal-bg{padding:0;align-items:flex-end}
+  .modal{border-radius:24px 24px 0 0;padding:20px}
+}
+
+/* Mobile Admin Panel correction — off-canvas navigation and full-width content */
+@media(max-width:900px){
+  body{overflow-x:hidden}
+  .header{
+    height:68px!important;
+    min-height:68px;
+    padding:0 14px!important;
+  }
+  .header-left{min-width:0;gap:10px}
+  .header .logo{
+    max-width:190px;
+    overflow:hidden;
+    text-overflow:ellipsis;
+    white-space:nowrap;
+    font-size:18px!important;
+  }
+  .header-user{
+    max-width:132px;
+    padding:7px 10px;
+    font-size:11px;
+  }
+  .menu{
+    flex:0 0 38px;
+    width:38px;
+    height:38px;
+  }
+  .sidebar{
+    top:68px!important;
+    left:0!important;
+    bottom:0!important;
+    width:min(286px,84vw)!important;
+    padding:22px 14px!important;
+    overflow-y:auto!important;
+    transform:translateX(-105%);
+    visibility:hidden;
+    opacity:0;
+    transition:transform .28s cubic-bezier(.22,.8,.25,1),opacity .2s ease,visibility .28s ease!important;
+    z-index:140!important;
+    box-shadow:18px 0 42px rgba(7,12,29,.28);
+  }
+  .sidebar.open{
+    width:min(286px,84vw)!important;
+    padding:22px 14px!important;
+    transform:translateX(0);
+    visibility:visible;
+    opacity:1;
+  }
+  .sidebar.open:after{
+    content:"";
+    position:fixed;
+    z-index:-1;
+    top:0;
+    right:-100vw;
+    bottom:0;
+    width:100vw;
+    background:rgba(8,13,28,.42);
+    backdrop-filter:blur(2px);
+    pointer-events:none;
+  }
+  .main{
+    width:100%!important;
+    max-width:none!important;
+    margin-left:0!important;
+    padding:22px 14px 34px!important;
+  }
+  .page-title{
+    margin-bottom:19px;
+    font-size:25px;
+  }
+  .stats{
+    grid-template-columns:repeat(2,minmax(0,1fr))!important;
+    gap:11px!important;
+  }
+  .stat{
+    min-width:0;
+    padding:16px 14px!important;
+    border-radius:17px;
+  }
+  .stat-label{
+    max-width:100%;
+    font-size:10px;
+    line-height:1.35;
+  }
+  .stat-value{font-size:23px}
+  .card{
+    width:100%;
+    padding:17px!important;
+    border-radius:18px;
+  }
+  .table-wrap{
+    border:0;
+    margin:0 -3px;
+    border-radius:0;
+  }
+  .filter-row{
+    flex-wrap:nowrap;
+    overflow-x:auto;
+    margin-right:-4px;
+    padding-right:4px;
+  }
+  .filter-btn{flex:0 0 auto}
+  .tournament-admin{grid-template-columns:1fr!important}
+  .t-card{border-radius:18px}
+  .t-body{padding:17px}
+  .actions .btn{flex:0 0 auto}
+  .modal-bg{padding:0!important;align-items:flex-end!important}
+  .modal{
+    width:100%;
+    max-width:none;
+    max-height:88vh;
+    border-radius:24px 24px 0 0!important;
+  }
+}
+@media(max-width:420px){
+  .header .logo{max-width:145px}
+  .header-user{max-width:104px}
+  .page-title{font-size:23px}
+  .stat-value{font-size:21px}
+  .main{padding-left:12px!important;padding-right:12px!important}
+  .btn.small{padding:7px 9px;font-size:11px}
+}
+.tm-alert-bg{
+  position:fixed;
+  inset:0;
+  z-index:600;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding:20px;
+  background:rgba(5,8,18,.7);
+  backdrop-filter:blur(8px);
+  animation:tmAlertFade .2s ease both;
+}
+.tm-alert-card{
+  width:min(100%,460px);
+  padding:27px 26px 22px;
+  border:1px solid rgba(255,255,255,.1);
+  border-radius:22px;
+  background:linear-gradient(145deg,#20283d,#0d1324 72%);
+  box-shadow:0 28px 80px rgba(0,0,0,.42),inset 0 1px 0 rgba(255,255,255,.08);
+  animation:tmAlertIn .3s cubic-bezier(.2,.8,.2,1) both;
+}
+.tm-alert-kicker{
+  margin-bottom:10px;
+  color:#e7c66a;
+  font-size:10px;
+  font-weight:800;
+  letter-spacing:.18em;
+  text-transform:uppercase;
+}
+.tm-alert-message{
+  min-height:48px;
+  color:#f8f9fd;
+  font-size:17px;
+  line-height:1.5;
+  letter-spacing:-.02em;
+  white-space:pre-wrap;
+  word-break:break-word;
+}
+.tm-alert-footer{
+  display:flex;
+  justify-content:flex-end;
+  margin-top:23px;
+}
+.tm-alert-ok{
+  min-width:92px;
+  padding:10px 18px;
+  border:1px solid rgba(121,224,204,.32);
+  border-radius:11px;
+  background:linear-gradient(135deg,#40cbb5,#178f86);
+  color:#071c1d;
+  font-weight:800;
+  box-shadow:0 8px 18px rgba(23,143,134,.25),inset 0 1px 0 rgba(255,255,255,.4);
+}
+.tm-alert-ok:hover{transform:translateY(-2px);filter:brightness(1.08)}
+@keyframes tmAlertFade{from{opacity:0}to{opacity:1}}
+@keyframes tmAlertIn{from{opacity:0;transform:translateY(12px) scale(.96)}to{opacity:1;transform:none}}
+@media(max-width:520px){
+  .tm-alert-card{padding:24px 21px 19px;border-radius:20px}
+  .tm-alert-message{font-size:16px}
+  .tm-alert-footer{margin-top:19px}
+}
+
+/* ===== NEW ADMIN ADDITIONS ===== */
+.rej-pill{display:inline-block;padding:4px 10px;border-radius:999px;font-size:12px;font-weight:800;background:#fee2e2;color:#991b1b}
+.switch{position:relative;display:inline-block;width:56px;height:30px}
+.switch input{opacity:0;width:0;height:0}
+.switch .slider{position:absolute;inset:0;cursor:pointer;border-radius:999px;background:#cbd5e1;transition:.25s}
+.switch .slider:before{content:"";position:absolute;height:24px;width:24px;left:3px;top:3px;border-radius:50%;background:#fff;transition:.25s;box-shadow:0 2px 6px rgba(0,0,0,.2)}
+.switch input:checked + .slider{background:#16a34a}
+.switch input:checked + .slider:before{transform:translateX(26px)}
+.rank-badge{width:30px;height:30px;border-radius:10px;display:inline-flex;align-items:center;justify-content:center;font-weight:900;background:#e0e7ff;color:#3730a3}
+.rank-badge.gold{background:linear-gradient(135deg,#f4d274,#c8942f);color:#3a2a06}
+.rank-badge.silver{background:linear-gradient(135deg,#dfe4ee,#9aa3b7);color:#26304a}
+.social-item{display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid #e2e8f0}
+.social-item:last-child{border-bottom:0}
+.social-item .si-name{font-weight:800}
+.social-item .si-url{font-size:12px;color:#64748b;word-break:break-all}
+.social-logo-preview{width:34px;height:34px;flex:0 0 34px;border-radius:8px;object-fit:cover;background:#f1f5f9;border:1px solid #e2e8f0}
+
+/* Requested additions: smooth rainbow loader and notification media */
+.spin{animation:tmSpin .72s linear infinite;will-change:transform;transform:translateZ(0)}
+.notif-admin-image{display:block;width:min(100%,360px);max-height:210px;object-fit:cover;border-radius:8px;margin:10px 0;border:1px solid var(--line)}
+.design-swatch{width:64px;height:38px;border-radius:8px;flex:none;border:1px solid rgba(255,255,255,.55);box-shadow:0 4px 10px rgba(15,23,42,.12)}
+.update-status{display:inline-flex;align-items:center;gap:7px;margin-bottom:12px;padding:7px 11px;border-radius:8px;background:var(--surface-soft);color:var(--muted);font-size:12px;font-weight:800}
+.update-status.on{background:#ddf8e9;color:#137145}
+.rainbow-ring{width:28px;height:28px;border-radius:50%;background:conic-gradient(#ff3d3d,#ffb13d,#f4ef42,#35d96f,#32c8ff,#635bff,#d946ef,#ff3d3d);position:relative;animation:tmSpin .72s linear infinite;will-change:transform;transform:translateZ(0)}
+.rainbow-ring:after{content:"";position:absolute;inset:5px;border-radius:50%;background:var(--surface)}
+@media(prefers-reduced-motion:reduce){.spin,.rainbow-ring{animation-duration:1.4s}}
+</style>
+</head>
+<body>
+
+<div id="loginScreen" class="login-screen">
+<div class="login-box">
+<div class="logo">TMGame</div>
+<div style="color:#64748b;margin-top:4px;font-size:14px">Admin Control Panel</div>
+<div class="login-title">Admin Login</div>
+<input id="adminEmail" type="email" placeholder="Admin Email">
+<input id="adminPassword" type="password" placeholder="Password">
+<button class="btn" style="width:100%;margin-top:10px" onclick="adminLogin()">Login</button>
+<div id="loginError" class="error"></div>
+</div>
+</div>
+
+<div id="adminApp" class="hidden">
+<header class="header">
+<div class="header-left">
+<button class="menu" onclick="toggleSidebar()">☰</button>
+<div class="logo" style="font-size:20px">TMGame Admin</div>
+</div>
+<div style="display:flex;align-items:center;gap:10px">
+<button id="refreshBtn" class="menu" style="font-size:20px;line-height:1" onclick="refreshData()" title="Refresh data">&#x21BB;</button>
+<div id="adminEmailDisplay" class="header-user">Admin</div>
+</div>
+</header>
+
+<div id="sidebar" class="sidebar">
+<button class="side-btn active" onclick="openPage('dashboardPage',this)">📊 Dashboard</button>
+<button class="side-btn" onclick="openPage('usersPage',this)">👤 Users</button>
+<button class="side-btn" onclick="openPage('depositsPage',this)">💰 Deposits</button>
+<button class="side-btn" onclick="openPage('withdrawalsPage',this)">💸 Withdrawals</button>
+<button class="side-btn" onclick="openCategoriesPage(this)">🎮 Game Categories</button>
+<button class="side-btn" onclick="openAllTournaments(this)">🏆 Tournaments</button>
+<button class="side-btn" onclick="openPage('notificationsPage',this)">🔔 Notifications</button>
+<button class="side-btn" onclick="openAppUpdatePage(this)">⬆️ App Update</button>
+<button class="side-btn" onclick="openPage('supportPage',this)">🎧 Support</button>
+<button class="side-btn" onclick="openPage('referralPage',this)">🎁 Referrals</button>
+<button class="side-btn" onclick="openPage('depositLimitPage',this)">🚫 Deposit Limit</button>
+<button class="side-btn" onclick="openPage('leaderboardPage',this)">🥇 Leaderboard</button>
+<button class="side-btn" onclick="openPage('socialPage',this)">🔗 Social Media Buttons</button>
+<button class="side-btn" onclick="openBannerPage(this)">🖼️ Slide Banner</button>
+<button class="side-btn" onclick="openGuidesPage(this)">📘 App Usage Guides</button>
+<button class="side-btn" onclick="openDesignPage(this)">🎨 Design Switcher</button>
+<button class="side-btn" onclick="openPage('settingsPage',this)">⚙️ Settings</button>
+<button class="side-btn" onclick="openPage('systemPage',this)">🛠️ System Control</button>
+<button class="side-btn" onclick="openPage('logsPage',this)">📝 Activity</button>
+<button class="side-btn" id="clearToggleBtn" onclick="toggleClearButtons()">🧹 Clear Buttons: OFF</button>
+<button class="side-btn" onclick="logoutAdmin()">🚪 Logout</button>
+</div>
+
+<main class="main">
+
+<!-- DASHBOARD -->
+<section id="dashboardPage" class="page active">
+<div class="page-title">Dashboard</div>
+<div class="stats">
+<div class="stat"><div class="stat-label">Total Users</div><div id="statUsers" class="stat-value">0</div></div>
+<div class="stat"><div class="stat-label">Blocked Users</div><div id="statBlocked" class="stat-value">0</div></div>
+<div class="stat"><div class="stat-label">Wallet Total</div><div id="statWallet" class="stat-value">₹0</div></div>
+<div class="stat"><div class="stat-label">Pending Deposits</div><div id="statPendingDeposits" class="stat-value">0</div></div>
+<div class="stat"><div class="stat-label">Pending Withdrawals</div><div id="statPendingWithdrawals" class="stat-value">0</div></div>
+<div class="stat"><div class="stat-label">Tournaments</div><div id="statTournaments" class="stat-value">0</div></div>
+<div class="stat"><div class="stat-label">Joined Players</div><div id="statJoined" class="stat-value">0</div></div>
+<div class="stat"><div class="stat-label">Open Support</div><div id="statSupport" class="stat-value">0</div></div>
+</div>
+</section>
+
+<!-- USERS -->
+<section id="usersPage" class="page">
+<div class="page-title">User Management</div>
+<div class="card"><input id="userSearch" placeholder="Search name / email / UID / phone" oninput="renderUsers()"></div>
+<div class="card">
+<div class="table-wrap">
+<table>
+<thead><tr><th>User</th><th>UID</th><th>Phone</th><th>Wallet</th><th>Winning</th><th>Status</th><th>Actions</th></tr></thead>
+<tbody id="usersTable"></tbody>
+</table>
+</div>
+</div>
+</section>
+
+<!-- DEPOSITS -->
+<section id="depositsPage" class="page">
+<div class="page-title">Deposit Management</div>
+<div class="card">
+<div class="filter-row">
+<button class="filter-btn active" onclick="setDepositFilter('All',this)">All</button>
+<button class="filter-btn" onclick="setDepositFilter('Pending',this)">Pending</button>
+<button class="filter-btn" onclick="setDepositFilter('Approved',this)">Approved</button>
+<button class="filter-btn" onclick="setDepositFilter('Rejected',this)">Rejected</button>
+<button class="btn small red clear-toggle" style="display:none" onclick="clearProcessedDeposits()">Clear</button>
+</div>
+<input id="depositSearch" placeholder="Search by Name or User ID" oninput="renderDeposits()" style="margin-bottom:14px">
+<div class="table-wrap">
+<table>
+<thead><tr><th>User</th><th>UID</th><th>Amount</th><th>Reference</th><th>Status</th><th>Action</th></tr></thead>
+<tbody id="depositsTable"></tbody>
+</table>
+</div>
+</div>
+</section>
+
+<!-- WITHDRAWALS -->
+<section id="withdrawalsPage" class="page">
+<div class="page-title">Withdrawal Management</div>
+<div class="card">
+<div class="info-box">Pending → Approve (deducts if not already held) → Mark Paid. Reject refunds the amount.</div>
+<div class="filter-row">
+<button class="filter-btn active" onclick="setWithdrawalFilter('All',this)">All</button>
+<button class="filter-btn" onclick="setWithdrawalFilter('Pending',this)">Pending</button>
+<button class="filter-btn" onclick="setWithdrawalFilter('Approved',this)">Approved</button>
+<button class="filter-btn" onclick="setWithdrawalFilter('Paid',this)">Paid</button>
+<button class="filter-btn" onclick="setWithdrawalFilter('Rejected',this)">Rejected</button>
+<button class="btn small red clear-toggle" style="display:none" onclick="clearProcessedWithdrawals()">Clear</button>
+</div>
+<input id="withdrawalSearch" placeholder="Search by Name or User ID" oninput="renderWithdrawals()" style="margin-bottom:14px">
+<div class="table-wrap">
+<table>
+<thead><tr><th>User</th><th>UID</th><th>Amount</th><th>UPI</th><th>Status</th><th>Tx</th><th>Action</th></tr></thead>
+<tbody id="withdrawalsTable"></tbody>
+</table>
+</div>
+</div>
+</section>
+
+<!-- GAME CATEGORIES -->
+<section id="categoriesPage" class="page">
+<div class="page-title">Game Categories</div>
+<div class="card">
+<div class="card-title" id="categoryFormTitle">Create Category</div>
+<div class="form-grid">
+<input id="cName" placeholder="Tournament / Category Name (e.g. Free Fire)" class="full">
+<input id="cImage" placeholder="Category Image URL" class="full">
+</div>
+<button class="btn" id="categorySaveBtn" style="margin-top:12px" onclick="saveCategory()">Create Category</button>
+<button class="btn gray" id="categoryCancelEditBtn" style="margin-top:12px;margin-left:8px;display:none" onclick="cancelEditCategory()">Cancel Edit</button>
+<div class="info-box" style="margin-top:12px">Click a category to open it and add tournament matches inside. Deleting a category never deletes its matches.</div>
+</div>
+<div class="tournament-admin" id="categoriesList"></div>
+</section>
+
+<!-- TOURNAMENTS -->
+<section id="tournamentsPage" class="page">
+<div class="page-title" id="tournamentsPageTitle">Tournament Management</div>
+<div class="card" id="categoryContextBar" style="display:none">
+<button class="btn gray small" onclick="openCategoriesPage()">← Back to Categories</button>
+<span style="margin-left:12px;font-weight:800" id="categoryContextName"></span>
+</div>
+<div class="card">
+<div class="card-title" id="tournamentFormTitle">Create Tournament</div>
+<div class="form-grid">
+<input id="tName" placeholder="Tournament Name" class="full">
+
+<input id="tMode" placeholder="Mode (type anything e.g. Solo, Duo, Custom)">
+
+<input id="tMap" placeholder="Map / Location">
+
+<div class="full">
+  <label class="form-label">Close Match Schedule</label>
+  <input id="tDateTime" type="datetime-local">
+</div>
+
+<div class="full">
+  <label class="form-label">Starting Match Schedule</label>
+  <input id="tRegistrationEnd" type="datetime-local">
+</div>
+
+<div class="full">
+  <label class="form-label">Match Ending</label>
+  <input id="tMatchEnding" type="datetime-local">
+</div>
+
+<select id="tEntryType">
+  <option value="Free">Free</option>
+  <option value="Paid">Paid</option>
+</select>
+
+<input id="tEntryFee" type="number" placeholder="Entry Fee" value="0">
+<input id="tPrize" type="number" placeholder="Prize Pool" value="0">
+<input id="tSlots" type="number" placeholder="Total Slots (e.g. 48)">
+
+<input id="tCustom1" placeholder="Custom Option 1 (e.g. 1 Kill)">
+<input id="tCustom2" placeholder="Custom Option 2 (e.g. 2 Kill)">
+
+<input id="tBanner" placeholder="Banner Image URL" class="full">
+<input id="tRoomId" placeholder="Room ID">
+<input id="tRoomPass" placeholder="Room Password">
+
+<div class="full">
+  <label class="form-label">Room Release Time</label>
+  <input id="tRoomRelease" type="datetime-local">
+</div>
+
+<select id="tStatus">
+  <option value="Upcoming">Upcoming</option>
+  <option value="Completed">Completed</option>
+  <option value="Cancel Match">Cancel Match</option>
+</select>
+
+<select id="tMatchOpen">
+  <option value="true">Match ON</option>
+  <option value="false">Match OFF (Closed)</option>
+</select>
+
+<textarea id="tRules" placeholder="Rules" class="full" rows="3"></textarea>
+<textarea id="tPrizeDistribution" placeholder="Prize Distribution" class="full" rows="2"></textarea>
+</div>
+
+<button class="btn" id="tournamentSaveBtn" style="margin-top:12px" onclick="saveTournament()">Create Tournament</button>
+<button class="btn gray" id="tournamentCancelEditBtn" style="margin-top:12px;margin-left:8px;display:none" onclick="cancelEditTournament()">Cancel Edit</button>
+</div>
+<div class="tournament-admin" id="tournamentsList"></div>
+</section>
+
+<!-- NOTIFICATIONS -->
+<section id="notificationsPage" class="page">
+<div class="page-title">Notifications</div>
+<div class="card">
+<div class="card-title">Send Notification</div>
+<input id="notifTitle" placeholder="Title">
+<textarea id="notifMessage" placeholder="Message" rows="3"></textarea>
+<input id="notifImageUrl" type="url" placeholder="Optional Image URL (https://...)">
+<select id="notifTarget"><option value="all">All Users</option><option value="specific">Specific User (enter UID below)</option></select>
+<input id="notifUserId" placeholder="User UID (only if specific)">
+<button class="btn" style="margin-top:10px" onclick="sendNotification()">Send Notification</button>
+</div>
+<div class="card">
+<div style="display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap"><div class="card-title" style="margin:0">Sent Notifications</div><button class="btn small red" onclick="deleteAllNotif()">Delete All</button></div>
+<div id="notifList"></div>
+</div>
+</section>
+
+<!-- APP UPDATE -->
+<section id="appUpdatePage" class="page">
+<div class="page-title">App Update</div>
+<div class="card">
+<div class="card-title">Publish an App Update</div>
+<div id="appUpdateStatus" class="update-status">No update published</div>
+<input id="updateVersion" placeholder="Version / Release ID (e.g. 2.1.0)">
+<textarea id="updateMessage" placeholder="Update Message / Changelog" rows="5"></textarea>
+<select id="updateLinkType" onchange="onUpdateLinkTypeChange()">
+<option value="playstore">Play Store</option>
+<option value="telegram">Telegram</option>
+</select>
+<input id="updateDownloadUrl" type="url" placeholder="New App Download URL (https://...)">
+<div class="actions" style="margin-top:10px">
+<button class="btn" onclick="publishAppUpdate()">Publish Update</button>
+<button class="btn gray" onclick="unpublishAppUpdate()">Unpublish</button>
+</div>
+</div>
+</section>
+
+<!-- SUPPORT -->
+<section id="supportPage" class="page">
+<div class="page-title">Customer Support</div>
+<div class="card">
+<div class="filter-row">
+<button class="filter-btn active" onclick="setSupportFilter('All',this)">All</button>
+<button class="filter-btn" onclick="setSupportFilter('Pending',this)">Pending</button>
+<button class="filter-btn" onclick="setSupportFilter('In Progress',this)">In Progress</button>
+<button class="filter-btn" onclick="setSupportFilter('Resolved',this)">Resolved</button>
+<button class="filter-btn" onclick="setSupportFilter('Closed',this)">Closed</button>
+</div>
+<div id="supportList"></div>
+</div>
+</section>
+
+<!-- REFERRALS -->
+<section id="referralPage" class="page">
+<div class="page-title">Referral Management</div>
+<div class="card">
+<div class="card-title">Refer Change — Referral Bonus Amount</div>
+<div class="info-box">This amount is credited to both the referrer and the new user after the new user's first approved deposit.</div>
+<input id="settingReferralBonus" type="number" min="0" step="1" placeholder="Referral bonus amount (e.g. 5)">
+<button class="btn" onclick="saveReferralBonus()">Save Refer Amount</button>
+</div>
+<div class="card">
+<input id="referralSearch" placeholder="Search by UID or Email / Gmail" oninput="renderReferrals()" style="margin-bottom:14px">
+<div class="table-wrap">
+<table>
+<thead><tr><th>Referrer</th><th>Code</th><th>Referred User</th><th>First Deposit</th><th>Reward Status</th><th>Date</th></tr></thead>
+<tbody id="referralTable"></tbody>
+</table>
+</div>
+</div>
+</section>
+
+<!-- DEPOSIT LIMIT (5-REJECTION RESTRICTIONS) -->
+<section id="depositLimitPage" class="page">
+<div class="page-title">Deposit Limit — Rejection Restrictions</div>
+<div class="card">
+<div class="info-box">Users are automatically restricted after <b>5 rejected</b> deposit/withdrawal requests. Reset here restores the account and gives back all 5 rejection attempts. This is completely separate from the Block/Unblock in the Users menu.</div>
+<input id="depositLimitSearch" placeholder="Search name / email / UID" oninput="renderDepositLimit()" style="margin-bottom:14px">
+<div class="table-wrap">
+<table>
+<thead><tr><th>User</th><th>UID</th><th>Rejections</th><th>Status</th><th>Action</th></tr></thead>
+<tbody id="depositLimitTable"></tbody>
+</table>
+</div>
+</div>
+</section>
+
+<!-- LEADERBOARD -->
+<section id="leaderboardPage" class="page">
+<div class="page-title">Leaderboard</div>
+<div class="card">
+<div class="toggle-row">
+<div>
+<div class="toggle-label">Show Leaderboard in User Panel</div>
+<div style="font-size:13px;color:#64748b;margin-top:2px">Turn OFF to hide the leaderboard from all users</div>
+</div>
+<label class="switch"><input type="checkbox" id="leaderboardToggle" onchange="saveLeaderboardSettings()"><span class="slider"></span></label>
+</div>
+</div>
+<div class="card">
+<div class="card-title">Rank Bonus Amounts</div>
+<div class="form-grid">
+<input id="settingRank1Bonus" type="number" min="0" placeholder="Rank 1 bonus amount">
+<input id="settingRank2Bonus" type="number" min="0" placeholder="Rank 2 bonus amount">
+</div>
+<div class="card-title" style="margin-top:18px">Bonus Schedule</div>
+<div style="font-size:13px;color:#64748b;margin-bottom:6px">Choose exactly when the weekly and monthly bonuses are credited. The user panel countdown timers follow these settings.</div>
+<div class="form-grid">
+<div>
+<label style="display:block;font-size:13px;font-weight:700;color:#334155">Weekly bonus day</label>
+<select id="settingWeeklyBonusDay">
+<option value="0">Sunday</option>
+<option value="1">Monday</option>
+<option value="2">Tuesday</option>
+<option value="3">Wednesday</option>
+<option value="4">Thursday</option>
+<option value="5">Friday</option>
+<option value="6">Saturday</option>
+</select>
+</div>
+<div>
+<label style="display:block;font-size:13px;font-weight:700;color:#334155">Monthly bonus date</label>
+<select id="settingMonthlyBonusDay">
+<option value="last">Last day of month</option>
+</select>
+</div>
+</div>
+<button class="btn" style="margin-top:12px" onclick="saveLeaderboardSettings()">Save Leaderboard Settings</button>
+</div>
+<div class="card">
+<div class="card-title">Top Users (by successful referrals)</div>
+<div class="table-wrap">
+<table>
+<thead><tr><th>Rank</th><th>User</th><th>UID</th><th>Successful Referrals</th><th>Bonus</th></tr></thead>
+<tbody id="leaderboardTable"></tbody>
+</table>
+</div>
+</div>
+</section>
+
+<!-- SOCIAL MEDIA BUTTONS -->
+<section id="socialPage" class="page">
+<div class="page-title">Social Media Buttons</div>
+<div class="card">
+<div class="card-title">Add Button</div>
+<div class="info-box">Each button added here appears instantly in the user panel profile section (Help menu).</div>
+<div class="form-grid">
+<input id="socialName" placeholder="App Name (e.g. WhatsApp)">
+<input id="socialImageUrl" type="url" placeholder="Logo Image URL (https://...)">
+<input id="socialUrl" placeholder="https://link-to-your-app" class="full">
+</div>
+<button class="btn" style="margin-top:12px" onclick="addSocialLink()">Add Button</button>
+</div>
+<div class="card">
+<div class="card-title">Existing Buttons</div>
+<div id="socialList"></div>
+</div>
+</section>
+
+<!-- SLIDE BANNER -->
+<section id="bannerPage" class="page">
+<div class="page-title">Slide Banner</div>
+<div class="card">
+<div class="card-title">Add Banner</div>
+<div class="info-box">Use 16:9 images (e.g. 1280x720). Banners appear instantly in the user panel home slider. If all banners are deleted, the slider is hidden completely.</div>
+<input id="bannerUrl" placeholder="https://image-url.jpg (16:9)">
+<select id="bannerAction" onchange="onBannerActionChange()">
+<option value="none">No Link (static image only)</option>
+<option value="deposit">Internal: Deposit Page</option>
+<option value="withdraw">Internal: Withdrawal Page</option>
+<option value="referral">Internal: Refer Page</option>
+<option value="telegram">External: Telegram App</option>
+<option value="youtube">External: YouTube App</option>
+<option value="playstore">External: Play Store</option>
+</select>
+<input id="bannerActionUrl" class="hidden" placeholder="Destination URL (https://...)">
+<button class="btn" style="margin-top:12px" onclick="addBanner()">Add Banner</button>
+</div>
+<div class="card">
+<div class="card-title">Existing Banners</div>
+<div id="bannerList"></div>
+</div>
+</section>
+
+<!-- DESIGN SWITCHER -->
+<section id="guidesPage" class="page">
+<div class="page-title">App Usage Guides</div>
+<div class="card">
+<div class="card-title">About Button (User Panel)</div>
+<div class="info-box">Turn the About button in the user Help menu ON or OFF and rename it. When OFF the button is hidden completely.</div>
+<label style="display:flex;align-items:center;gap:10px;margin:10px 0"><input type="checkbox" id="aboutToggle" style="width:auto"> Show About button in user panel</label>
+<input id="aboutTitleInput" placeholder="About button title (e.g. About / Help Guide)">
+<button class="btn" style="margin-top:12px" onclick="saveAboutSettings()">Save About Settings</button>
+</div>
+<div class="card">
+<div class="card-title" id="guideFormTitle">Create Guide Post</div>
+<input id="guideTitle" placeholder="Title (e.g. How do I deposit money?)">
+<textarea id="guideDesc" placeholder="Description / Tutorial" rows="5"></textarea>
+<button class="btn" id="guideSaveBtn" style="margin-top:12px" onclick="saveGuide()">Add Guide</button>
+<button class="btn gray" id="guideCancelBtn" style="margin-top:12px;margin-left:8px;display:none" onclick="cancelEditGuide()">Cancel Edit</button>
+</div>
+<div class="card">
+<div class="card-title">Existing Guides</div>
+<div id="guidesList"></div>
+</div>
+</section>
+
+<section id="designPage" class="page">
+<div class="page-title">Design Switcher</div>
+<div class="card">
+<div class="card-title">Wallet Section Layouts</div>
+<div class="info-box">Choose one of 30 wallet designs. It instantly changes the Balance, Deposit and Withdraw cards in the user panel.</div>
+<div id="designList" style="max-height:60vh;overflow-y:auto;margin-top:12px"></div>
+</div>
+</section>
+
+<!-- SETTINGS -->
+<section id="settingsPage" class="page">
+<div class="page-title">Settings</div>
+<div class="card">
+<div class="card-title">Payment Settings</div>
+<input id="settingUpi" placeholder="Admin UPI ID">
+<input id="settingQr" placeholder="QR Image URL">
+<input id="settingMinDeposit" type="number" placeholder="Min Deposit">
+<input id="settingMinWithdraw" type="number" placeholder="Min Withdrawal">
+</div>
+<div class="card">
+<div class="card-title">Support & App</div>
+<input id="settingSupportImageUrl" type="url" placeholder="Customer Support Logo Image URL (https://...)">
+<input id="settingTelegram" placeholder="Telegram Support URL">
+<input id="settingTelegramImageUrl" type="url" placeholder="Telegram Logo Image URL (https://...)">
+<input id="settingAppName" placeholder="App Name">
+<textarea id="settingAnnouncement" placeholder="Announcement" rows="3"></textarea>
+</div>
+<button class="btn" onclick="saveSettings()">Save Settings</button>
+</section>
+
+<!-- SYSTEM CONTROL -->
+<section id="systemPage" class="page">
+<div class="page-title">System Control</div>
+<div class="card">
+<div class="card-title">Withdrawal Control</div>
+<div class="toggle-row">
+<div>
+<div class="toggle-label">Withdrawals</div>
+<div style="font-size:13px;color:#64748b;margin-top:2px">Turn off to completely disable user withdrawals</div>
+</div>
+<div style="display:flex;align-items:center;gap:10px">
+<span id="withdrawalStatusBadge" class="toggle-status on">ON</span>
+<button class="btn small" id="withdrawalToggleBtn" onclick="toggleSystemFlag('withdrawal')">Turn OFF</button>
+</div>
+</div>
+<div id="withdrawalReasonBox" class="reason-box">
+<label style="font-size:13px;font-weight:700;color:#334155">Why are you turning this OFF?</label>
+<textarea id="withdrawalOffReason" placeholder="Enter reason / advice for users..." rows="2"></textarea>
+</div>
+</div>
+
+<div class="card">
+<div class="card-title">Deposit Control</div>
+<div class="toggle-row">
+<div>
+<div class="toggle-label">Deposits</div>
+<div style="font-size:13px;color:#64748b;margin-top:2px">Turn off to completely disable user deposits</div>
+</div>
+<div style="display:flex;align-items:center;gap:10px">
+<span id="depositStatusBadge" class="toggle-status on">ON</span>
+<button class="btn small" id="depositToggleBtn" onclick="toggleSystemFlag('deposit')">Turn OFF</button>
+</div>
+</div>
+<div id="depositReasonBox" class="reason-box">
+<label style="font-size:13px;font-weight:700;color:#334155">Why are you turning this OFF?</label>
+<textarea id="depositOffReason" placeholder="Enter reason / advice for users..." rows="2"></textarea>
+</div>
+</div>
+
+<div class="card">
+<div class="card-title">Other System Options</div>
+<div class="info-box" style="margin-bottom:0">
+Additional system-wide toggles can be added here in future.
+</div>
+</div>
+
+<button class="btn" onclick="saveSystemSettings()">Save System Settings</button>
+</section>
+
+<!-- LOGS -->
+<section id="logsPage" class="page">
+<div class="page-title">Admin Activity</div>
+<div class="card">
+<div class="table-wrap">
+<table>
+<thead><tr><th>Action</th><th>Admin</th><th>Details</th><th>Time</th></tr></thead>
+<tbody id="logsTable"></tbody>
+</table>
+</div>
+</div>
+</section>
+
+</main>
+</div>
+
+<!-- PLAYER MODAL -->
+<div id="playerModal" class="modal-bg hidden" onclick="if(event.target===this)closePlayerModal()">
+<div class="modal">
+<div class="modal-title" id="playerModalTitle">Joined Players</div>
+<div id="playerModalContent"></div>
+<button class="btn gray" style="width:100%;margin-top:16px" onclick="closePlayerModal()">Close</button>
+</div>
+</div>
+
+<script type="module">
+/* =========================================================================
+   LOCAL DATA ENGINE (no external service)
+   -------------------------------------------------------------------------
+   This lightweight engine keeps the exact
+   same function names the app already uses (collection/doc/getDoc/getDocs/
+   addDoc/setDoc/updateDoc/deleteDoc/query/where/limit/orderBy/
+   runTransaction/serverTimestamp/arrayUnion/onSnapshot + the auth helpers),
+   but stores everything in the browser's localStorage.
+   Nothing in the HTML / CSS / UI was changed.
+   ========================================================================= */
+const TM_DB_KEY = "tmgameLocalDB";
+const TM_AUTH_KEY = "tmgameLocalAuth";
+
+function tmRead(key, fallback){
+  try{ const raw = localStorage.getItem(key); return raw ? JSON.parse(raw) : fallback; }
+  catch(e){ return fallback; }
+}
+function tmWrite(key, value){
+  try{ localStorage.setItem(key, JSON.stringify(value)); }catch(e){}
+}
+function tmStore(){
+  const s = tmRead(TM_DB_KEY, null);
+  return (s && typeof s === "object" && s.collections) ? s : { collections:{} };
+}
+function tmSaveStore(s){ tmWrite(TM_DB_KEY, s); tmNotify(); }
+function tmCol(s, name){ if(!s.collections[name]) s.collections[name] = {}; return s.collections[name]; }
+function tmId(){ return "id_" + Date.now().toString(36) + Math.random().toString(36).slice(2,9); }
+function tmClone(v){ try{ return JSON.parse(JSON.stringify(v)); }catch(e){ return v; } }
+
+/* ---- timestamps ---- */
+function serverTimestamp(){
+  const ms = Date.now();
+  return { __ts:true, seconds: Math.floor(ms/1000), nanoseconds: (ms%1000)*1e6 };
+}
+function tmHydrate(value){
+  if(Array.isArray(value)) return value.map(tmHydrate);
+  if(value && typeof value === "object"){
+    if(value.__ts && typeof value.seconds === "number"){
+      const secs = value.seconds;
+      return { seconds: secs, nanoseconds: value.nanoseconds || 0, toDate: () => new Date(secs*1000),
+               toMillis: () => secs*1000, toString: () => new Date(secs*1000).toISOString() };
+    }
+    const out = {};
+    for(const k in value) out[k] = tmHydrate(value[k]);
+    return out;
+  }
+  return value;
+}
+
+/* ---- field ops ---- */
+function arrayUnion(...values){ return { __op:"arrayUnion", values }; }
+function arrayRemove(...values){ return { __op:"arrayRemove", values }; }
+function increment(n){ return { __op:"increment", value: Number(n)||0 }; }
+function tmApplyOps(target, data){
+  const out = Object.assign({}, target);
+  for(const key in data){
+    const val = data[key];
+    if(val && typeof val === "object" && val.__op === "arrayUnion"){
+      const arr = Array.isArray(out[key]) ? out[key].slice() : [];
+      val.values.forEach(v => { if(!arr.some(x => JSON.stringify(x) === JSON.stringify(v))) arr.push(v); });
+      out[key] = arr;
+    } else if(val && typeof val === "object" && val.__op === "arrayRemove"){
+      const arr = Array.isArray(out[key]) ? out[key].slice() : [];
+      out[key] = arr.filter(x => !val.values.some(v => JSON.stringify(x) === JSON.stringify(v)));
+    } else if(val && typeof val === "object" && val.__op === "increment"){
+      out[key] = (Number(out[key]) || 0) + val.value;
+    } else {
+      out[key] = tmClone(val);
+    }
+  }
+  return out;
+}
+
+/* ---- refs ---- */
+const db = { __localDb:true };
+function collection(_db, name, ...rest){
+  const path = [name, ...rest].filter(Boolean);
+  return { __type:"collection", name: path.join("/") };
+}
+function doc(a, b, ...rest){
+  if(a && a.__type === "collection") return { __type:"doc", name:a.name, id: b || tmId() };
+  const parts = [b, ...rest].filter(v => v !== undefined && v !== null);
+  if(parts.length >= 2){
+    const id = parts.pop();
+    return { __type:"doc", name: parts.join("/"), id: String(id) };
+  }
+  return { __type:"doc", name: String(b), id: tmId() };
+}
+
+/* ---- query constraints ---- */
+function where(field, op, value){ return { __c:"where", field, op, value }; }
+function limit(n){ return { __c:"limit", n:Number(n)||0 }; }
+function orderBy(field, dir){ return { __c:"orderBy", field, dir: dir || "asc" }; }
+function query(ref, ...constraints){
+  return { __type:"query", name: ref.name, constraints: constraints.filter(Boolean) };
+}
+function tmField(obj, field){
+  return String(field).split(".").reduce((o,k) => (o == null ? o : o[k]), obj);
+}
+function tmSortValue(v){
+  if(v && typeof v === "object" && typeof v.seconds === "number") return v.seconds;
+  if(typeof v === "string"){ const t = Date.parse(v); if(!isNaN(t)) return t; }
+  return v;
+}
+
+/* ---- snapshots ---- */
+function tmDocSnap(name, id, raw){
+  const exists = raw !== undefined && raw !== null;
+  return {
+    id, ref:{ __type:"doc", name, id },
+    exists: () => exists,
+    data: () => exists ? tmHydrate(raw) : undefined
+  };
+}
+function tmRunQuery(refOrQuery){
+  const s = tmStore();
+  const name = refOrQuery.name;
+  const bucket = s.collections[name] || {};
+  let rows = Object.keys(bucket).map(id => ({ id, raw: bucket[id] }));
+  const cs = refOrQuery.constraints || [];
+  cs.filter(c => c.__c === "where").forEach(c => {
+    rows = rows.filter(r => {
+      const v = tmField(r.raw, c.field);
+      switch(c.op){
+        case "==": return JSON.stringify(v) === JSON.stringify(c.value);
+        case "!=": return JSON.stringify(v) !== JSON.stringify(c.value);
+        case ">": return v > c.value;
+        case ">=": return v >= c.value;
+        case "<": return v < c.value;
+        case "<=": return v <= c.value;
+        case "in": return Array.isArray(c.value) && c.value.some(x => JSON.stringify(x) === JSON.stringify(v));
+        case "array-contains": return Array.isArray(v) && v.some(x => JSON.stringify(x) === JSON.stringify(c.value));
+        default: return true;
+      }
+    });
+  });
+  const ob = cs.find(c => c.__c === "orderBy");
+  if(ob){
+    rows.sort((a,b) => {
+      const av = tmSortValue(tmField(a.raw, ob.field)), bv = tmSortValue(tmField(b.raw, ob.field));
+      if(av === bv) return 0;
+      if(av === undefined || av === null) return 1;
+      if(bv === undefined || bv === null) return -1;
+      return av > bv ? 1 : -1;
+    });
+    if(ob.dir === "desc") rows.reverse();
+  }
+  const lim = cs.find(c => c.__c === "limit");
+  if(lim && lim.n > 0) rows = rows.slice(0, lim.n);
+  const docs = rows.map(r => tmDocSnap(name, r.id, r.raw));
+  return { docs, size: docs.length, empty: docs.length === 0, forEach: fn => docs.forEach(fn) };
+}
+
+/* ---- reads / writes ---- */
+async function getDoc(ref){
+  const s = tmStore();
+  const bucket = s.collections[ref.name] || {};
+  return tmDocSnap(ref.name, ref.id, bucket[ref.id]);
+}
+async function getDocs(refOrQuery){ return tmRunQuery(refOrQuery); }
+async function setDoc(ref, data, options){
+  const s = tmStore();
+  const bucket = tmCol(s, ref.name);
+  const base = (options && options.merge && bucket[ref.id]) ? bucket[ref.id] : {};
+  bucket[ref.id] = tmApplyOps(base, data);
+  tmSaveStore(s);
+}
+async function updateDoc(ref, data){
+  const s = tmStore();
+  const bucket = tmCol(s, ref.name);
+  if(!bucket[ref.id]) throw new Error("Document not found: " + ref.name + "/" + ref.id);
+  bucket[ref.id] = tmApplyOps(bucket[ref.id], data);
+  tmSaveStore(s);
+}
+async function addDoc(colRef, data){
+  const s = tmStore();
+  const bucket = tmCol(s, colRef.name);
+  const id = tmId();
+  bucket[id] = tmApplyOps({}, data);
+  tmSaveStore(s);
+  return { id, __type:"doc", name: colRef.name };
+}
+async function deleteDoc(ref){
+  const s = tmStore();
+  const bucket = tmCol(s, ref.name);
+  delete bucket[ref.id];
+  tmSaveStore(s);
+}
+async function runTransaction(_db, updateFn){
+  const tx = {
+    get: ref => getDoc(ref),
+    set: (ref, data, options) => { setDoc(ref, data, options); return tx; },
+    update: (ref, data) => { updateDoc(ref, data); return tx; },
+    delete: ref => { deleteDoc(ref); return tx; }
+  };
+  return await updateFn(tx);
+}
+
+/* ---- live updates ---- */
+const tmListeners = new Set();
+function tmNotify(){ tmListeners.forEach(fn => { try{ fn(); }catch(e){} }); }
+window.addEventListener("storage", e => { if(e.key === TM_DB_KEY || e.key === TM_AUTH_KEY) tmNotify(); });
+function onSnapshot(refOrQuery, onNext, onError){
+  const emit = () => {
+    try{
+      if(refOrQuery.__type === "doc") onNext(tmRunQuery({ name: refOrQuery.name }).docs.find(d => d.id === refOrQuery.id) || tmDocSnap(refOrQuery.name, refOrQuery.id, undefined));
+      else onNext(tmRunQuery(refOrQuery));
+    }catch(err){ if(onError) onError(err); }
+  };
+  emit();
+  tmListeners.add(emit);
+  return () => tmListeners.delete(emit);
+}
+
+/* ---- local authentication ---- */
+const browserLocalPersistence = "local";
+async function setPersistence(){ return true; }
+
+function tmAuthStore(){
+  const a = tmRead(TM_AUTH_KEY, null);
+  const store = (a && typeof a === "object" && Array.isArray(a.accounts)) ? a : { accounts:[], currentUid:null };
+  if(!store.accounts.some(x => x.email === "admin@tmgame.com")){
+    store.accounts.push({ uid:"admin_default", email:"admin@tmgame.com", password:"admin123" });
+    tmWrite(TM_AUTH_KEY, store);
+  }
+  return store;
+}
+function tmSaveAuth(store){ tmWrite(TM_AUTH_KEY, store); }
+function tmAuthError(code, message){ const e = new Error(message); e.code = code; return e; }
+
+const tmAuthWatchers = new Set();
+const auth = { currentUser: null };
+(function initAuth(){
+  const store = tmAuthStore();
+  const acc = store.accounts.find(a => a.uid === store.currentUid);
+  auth.currentUser = acc ? { uid: acc.uid, email: acc.email } : null;
+})();
+function tmSetUser(user){
+  auth.currentUser = user;
+  const store = tmAuthStore();
+  store.currentUid = user ? user.uid : null;
+  tmSaveAuth(store);
+  tmAuthWatchers.forEach(fn => { try{ fn(user); }catch(e){} });
+}
+function onAuthStateChanged(_auth, cb){
+  tmAuthWatchers.add(cb);
+  setTimeout(() => { try{ cb(auth.currentUser); }catch(e){} }, 0);
+  return () => tmAuthWatchers.delete(cb);
+}
+async function createUserWithEmailAndPassword(_auth, email, password){
+  email = String(email || "").trim().toLowerCase();
+  if(!email) throw tmAuthError("auth/invalid-email", "Invalid email address.");
+  if(String(password || "").length < 6) throw tmAuthError("auth/weak-password", "Password should be at least 6 characters.");
+  const store = tmAuthStore();
+  if(store.accounts.some(a => a.email === email)) throw tmAuthError("auth/email-already-in-use", "This email is already registered.");
+  const account = { uid: "u_" + tmId(), email, password: String(password) };
+  store.accounts.push(account);
+  tmSaveAuth(store);
+  const user = { uid: account.uid, email: account.email };
+  tmSetUser(user);
+  return { user };
+}
+async function signInWithEmailAndPassword(_auth, email, password){
+  email = String(email || "").trim().toLowerCase();
+  const store = tmAuthStore();
+  const account = store.accounts.find(a => a.email === email);
+  if(!account) throw tmAuthError("auth/user-not-found", "No account found with this email.");
+  if(account.password !== String(password)) throw tmAuthError("auth/invalid-credential", "Incorrect email or password.");
+  const user = { uid: account.uid, email: account.email };
+  tmSetUser(user);
+  return { user };
+}
+async function signOut(){ tmSetUser(null); return true; }
+
+
+let admin = null;
+let users = [], deposits = [], withdrawals = [], tournaments = [], participants = [], notifications = [], supportTickets = [];
+let depositFilter = "All", withdrawalFilter = "All", supportFilter = "All";
+let editingTournamentId = null;
+let categories = [], editingCategoryId = null, currentCategoryId = null;
+
+let appSettings = {
+  referralBonus: 5,
+  leaderboardEnabled: true,
+  rank1Bonus: 0,
+  rank2Bonus: 0,
+  weeklyBonusDay: 0,
+  monthlyBonusDay: "last",
+  socialLinks: [],
+  banners: [],
+  walletDesign: 1,
+  appUpdate: { enabled:false, version:"", message:"", downloadUrl:"", linkType:"playstore" }
+};
+
+let systemFlags = {
+  withdrawalEnabled: true,
+  withdrawalOffReason: "",
+  depositEnabled: true,
+  depositOffReason: ""
+};
+
+window.adminLogin = async function(){
+  const email = document.getElementById("adminEmail").value.trim();
+  const password = document.getElementById("adminPassword").value;
+  const error = document.getElementById("loginError");
+  error.textContent = "";
+  if(!email || !password){ error.textContent = "Enter email and password"; return; }
+  try{ await signInWithEmailAndPassword(auth, email, password); }
+  catch(e){ error.textContent = e.message; }
+};
+
+onAuthStateChanged(auth, async user => {
+  if(!user){
+    document.getElementById("loginScreen").classList.remove("hidden");
+    document.getElementById("adminApp").classList.add("hidden");
+    return;
+  }
+  try{
+    const adminRef = doc(db, "admins", user.uid);
+    const adminDoc = await getDoc(adminRef);
+    
+    if(!adminDoc.exists()){
+      try {
+        await setDoc(adminRef, {
+          email: user.email,
+          role: "admin",
+          active: true,
+          createdAt: serverTimestamp()
+        });
+      } catch(err) {
+        console.warn("Could not auto-create admin doc:", err);
+      }
+    } else {
+      const data = adminDoc.data();
+      if(data.role !== "admin" || data.active !== true){
+        await signOut(auth);
+        document.getElementById("loginError").textContent = "Not an authorized admin";
+        return;
+      }
+    }
+
+    admin = user;
+    document.getElementById("loginScreen").classList.add("hidden");
+    document.getElementById("adminApp").classList.remove("hidden");
+    document.getElementById("adminEmailDisplay").textContent = user.email;
+    await loadEverything();
+  }catch(e){
+    console.error(e);
+    await signOut(auth);
+    document.getElementById("loginError").textContent = "Unable to verify admin: " + e.message;
+  }
+});
+
+async function loadEverything(){
+  await Promise.all([loadUsers(), loadDeposits(), loadWithdrawals(), loadCategories(), loadTournaments(), loadParticipants(), loadNotifications(), loadSupport(), loadSettings(), loadLogs()]);
+  calculateDashboard();
+  renderUsers(); renderDeposits(); renderWithdrawals(); renderCategories(); renderTournaments(); renderNotifications(); renderSupport(); renderReferrals();
+  renderDepositLimit(); renderLeaderboardAdmin(); renderSocialList();
+  updateSystemUI();
+}
+
+window.copyText = function(text, btn){
+  const done=()=>{ if(btn){ const o=btn.textContent; btn.textContent="Copied!"; setTimeout(()=>btn.textContent=o,1200); } };
+  if(navigator.clipboard && window.isSecureContext){ navigator.clipboard.writeText(text).then(done).catch(()=>fallbackCopy(text,done)); }
+  else fallbackCopy(text,done);
+};
+function fallbackCopy(text, done){
+  const ta=document.createElement("textarea"); ta.value=text; ta.style.position="fixed"; ta.style.opacity="0";
+  document.body.appendChild(ta); ta.focus(); ta.select();
+  try{ document.execCommand("copy"); }catch(e){}
+  document.body.removeChild(ta); done();
+}
+window.refreshData = async function(){
+  const btn=document.getElementById("refreshBtn");
+  if(btn){ btn.disabled=true; btn.classList.add("spin"); }
+  try{ await loadEverything(); }
+  catch(e){ console.error(e); alert("Refresh failed. Check your connection."); }
+  if(btn){ btn.disabled=false; btn.classList.remove("spin"); }
+};
+
+async function loadUsers(){ users = []; const snap = await getDocs(collection(db,"users")); snap.forEach(d => users.push({id:d.id, ...d.data()})); }
+async function loadDeposits(){ deposits = []; const snap = await getDocs(collection(db,"deposits")); snap.forEach(d => deposits.push({id:d.id, ...d.data()})); }
+async function loadWithdrawals(){ withdrawals = []; const snap = await getDocs(collection(db,"withdrawals")); snap.forEach(d => withdrawals.push({id:d.id, ...d.data()})); }
+async function loadCategories(){ categories = []; try{ const snap = await getDocs(collection(db,"gameCategories")); snap.forEach(d => categories.push({id:d.id, ...d.data()})); }catch(e){ console.error("loadCategories",e); } }
+async function loadTournaments(){ tournaments = []; const snap = await getDocs(collection(db,"tournaments")); snap.forEach(d => tournaments.push({id:d.id, ...d.data()})); }
+async function loadParticipants(){ participants = []; const snap = await getDocs(collection(db,"tournamentParticipants")); snap.forEach(d => participants.push({id:d.id, ...d.data()})); }
+async function loadNotifications(){ notifications = []; const snap = await getDocs(collection(db,"notifications")); snap.forEach(d => notifications.push({id:d.id, ...d.data()})); }
+async function loadSupport(){ supportTickets = []; const snap = await getDocs(collection(db,"supportTickets")); snap.forEach(d => supportTickets.push({id:d.id, ...d.data()})); }
+
+function calculateDashboard(){
+  document.getElementById("statUsers").textContent = users.length;
+  document.getElementById("statBlocked").textContent = users.filter(u => u.isBlocked === true).length;
+  document.getElementById("statWallet").textContent = "₹" + users.reduce((s,u)=>s+Number(u.walletBalance||0),0).toFixed(2);
+  document.getElementById("statPendingDeposits").textContent = deposits.filter(d=>d.status==="Pending").length;
+  document.getElementById("statPendingWithdrawals").textContent = withdrawals.filter(w=>w.status==="Pending").length;
+  document.getElementById("statTournaments").textContent = tournaments.length;
+  document.getElementById("statJoined").textContent = participants.length;
+  document.getElementById("statSupport").textContent = supportTickets.filter(t => ["Pending","In Progress"].includes(t.status)).length;
+}
+
+window.renderUsers = function(){
+  const search = (document.getElementById("userSearch").value || "").toLowerCase();
+  const box = document.getElementById("usersTable");
+  const filtered = users.filter(u => 
+    String(u.name||"").toLowerCase().includes(search) ||
+    String(u.email||"").toLowerCase().includes(search) ||
+    String(u.uid||u.id||"").toLowerCase().includes(search) ||
+    String(u.phone||"").toLowerCase().includes(search)
+  );
+  if(!filtered.length){ box.innerHTML = `<tr><td colspan="7" class="empty">No users found</td></tr>`; return; }
+  box.innerHTML = filtered.map(u => `
+  <tr>
+    <td><div class="user-info"><div class="user-name">${esc(u.name||"-")}</div><div class="user-email">${esc(u.email||"-")}</div></div></td>
+    <td><div class="id-box"><div class="id-text">${esc(u.uid||u.id)}</div><button class="btn copy" onclick="copyText('${esc(u.uid||u.id)}')">Copy</button></div></td>
+    <td>${esc(u.phone || "-")}</td>
+    <td class="money">₹${Number(u.walletBalance||0).toFixed(2)}</td>
+    <td class="money">₹${Number(u.winningBalance||0).toFixed(2)}</td>
+    <td><span class="status ${u.isBlocked ? 'blocked' : 'active-status'}">${u.isBlocked ? 'Blocked' : 'Active'}</span></td>
+    <td class="actions">
+      <button class="btn small green" onclick="walletAdd('${u.id}')">+ Money</button>
+      <button class="btn small red" onclick="walletRemove('${u.id}')">- Money</button>
+      <button class="btn small green" onclick="winningAdd('${u.id}')">+ Win</button>
+      <button class="btn small red" onclick="winningRemove('${u.id}')">- Win</button>
+      ${u.isBlocked 
+        ? `<button class="btn small green" onclick="unblockUser('${u.id}')">Unblock</button>`
+        : `<button class="btn small red" onclick="blockUser('${u.id}')">Block</button>`}
+    </td>
+  </tr>`).join("");
+};
+
+window.blockUser = async function(uid){
+  if(!confirm("Block this user?")) return;
+  await updateDoc(doc(db,"users",uid), { isBlocked: true });
+  await addLog("User Blocked", uid);
+  await loadUsers(); renderUsers(); calculateDashboard();
+  alert("User blocked");
+};
+window.unblockUser = async function(uid){
+  await updateDoc(doc(db,"users",uid), { isBlocked: false });
+  await addLog("User Unblocked", uid);
+  await loadUsers(); renderUsers(); calculateDashboard();
+  alert("User unblocked");
+};
+
+window.walletAdd = async function(uid){
+  const amount = Number(prompt("Amount to add:"));
+  if(!amount || amount<=0) return;
+  const ref = doc(db,"users",uid);
+  const snap = await getDoc(ref);
+  if(!snap.exists()) return alert("User not found");
+  const bal = Number(snap.data().walletBalance||0);
+  await updateDoc(ref, { walletBalance: bal + amount });
+  await addDoc(collection(db,"walletTransactions"), {
+    userId: uid, type: "admin_credit", amount: amount, balanceAfter: bal+amount,
+    reason: "Admin credit", createdAt: serverTimestamp()
+  });
+  await addLog("Wallet Credit", `₹${amount} to ${uid}`);
+  await loadUsers(); renderUsers(); calculateDashboard();
+};
+window.walletRemove = async function(uid){
+  const amount = Number(prompt("Amount to remove:"));
+  if(!amount || amount<=0) return;
+  const ref = doc(db,"users",uid);
+  const snap = await getDoc(ref);
+  if(!snap.exists()) return alert("User not found");
+  const bal = Number(snap.data().walletBalance||0);
+  if(amount > bal) return alert("Insufficient balance");
+  await updateDoc(ref, { walletBalance: bal - amount });
+  await addDoc(collection(db,"walletTransactions"), {
+    userId: uid, type: "admin_debit", amount: -amount, balanceAfter: bal-amount,
+    reason: "Admin debit", createdAt: serverTimestamp()
+  });
+  await addLog("Wallet Debit", `₹${amount} from ${uid}`);
+  await loadUsers(); renderUsers(); calculateDashboard();
+};
+
+window.winningAdd = async function(uid){
+  const amount = Number(prompt("Winning amount to add:"));
+  if(!amount || amount<=0) return;
+  const ref = doc(db,"users",uid);
+  const snap = await getDoc(ref);
+  if(!snap.exists()) return alert("User not found");
+  const bal = Number(snap.data().winningBalance||0);
+  await updateDoc(ref, { winningBalance: bal + amount });
+  await addDoc(collection(db,"walletTransactions"), {
+    userId: uid, type: "admin_win_credit", amount: amount, balanceAfter: bal+amount,
+    reason: "Admin winning credit", createdAt: serverTimestamp()
+  });
+  await addLog("Winning Credit", `₹${amount} to ${uid}`);
+  await loadUsers(); renderUsers(); calculateDashboard();
+  alert("Winning balance added");
+};
+
+window.winningRemove = async function(uid){
+  const amount = Number(prompt("Winning amount to deduct:"));
+  if(!amount || amount<=0) return;
+  const ref = doc(db,"users",uid);
+  const snap = await getDoc(ref);
+  if(!snap.exists()) return alert("User not found");
+  const bal = Number(snap.data().winningBalance||0);
+  if(amount > bal) return alert("Insufficient winning balance");
+  await updateDoc(ref, { winningBalance: bal - amount });
+  await addDoc(collection(db,"walletTransactions"), {
+    userId: uid, type: "admin_win_debit", amount: -amount, balanceAfter: bal-amount,
+    reason: "Admin winning debit", createdAt: serverTimestamp()
+  });
+  await addLog("Winning Debit", `₹${amount} from ${uid}`);
+  await loadUsers(); renderUsers(); calculateDashboard();
+  alert("Winning balance deducted");
+};
+
+window.setDepositFilter = function(f,b){ depositFilter=f; document.querySelectorAll("#depositsPage .filter-btn").forEach(x=>x.classList.remove("active")); if(b)b.classList.add("active"); renderDeposits(); };
+function renderDeposits(){
+  const box = document.getElementById("depositsTable");
+  let list = depositFilter==="All" ? deposits : deposits.filter(d=>String(d.status||"Pending")===depositFilter);
+  const dq=(document.getElementById("depositSearch")?.value||"").toLowerCase().trim();
+  if(dq) list=list.filter(d=>(d.userName||"").toLowerCase().includes(dq)||String(d.userId||"").toLowerCase().includes(dq)||(d.userEmail||"").toLowerCase().includes(dq));
+  if(!list.length){ box.innerHTML=`<tr><td colspan="6" class="empty">No deposits</td></tr>`; return; }
+  box.innerHTML = list.map(d=>`
+  <tr>
+    <td><div class="user-info"><div class="user-name">${esc(d.userName||"-")}</div><div class="user-email">${esc(d.userEmail||"-")} <button class="btn copy" onclick="copyText('${esc(d.userEmail||"")}',this)">Copy</button></div></div></td>
+    <td><div class="id-box"><div class="id-text">${esc(d.userId||"-")}</div><button class="btn copy" onclick="copyText('${esc(d.userId||"")}',this)">Copy</button></div></td>
+    <td class="money">₹${Number(d.amount||0).toFixed(2)}</td>
+    <td>${esc(d.txid||"-")}</td>
+    <td><span class="status ${statusClass(d.status)}">${esc(d.status||"Pending")}</span></td>
+    <td>${d.status==="Pending"?`<div class="actions"><button class="btn small green" onclick="approveDeposit('${d.id}')">Approve</button><button class="btn small red" onclick="rejectDeposit('${d.id}')">Reject</button></div>`:"-"}</td>
+  </tr>`).join("");
+}
+
+window.approveDeposit = async function(id){
+  const deposit = deposits.find(d=>d.id===id);
+  if(!deposit || deposit.status!=="Pending") return;
+  const userId = deposit.userId;
+  const amount = Number(deposit.amount||0);
+
+  try{
+    await runTransaction(db, async (transaction) => {
+      const userRef = doc(db, "users", userId);
+      const userSnap = await transaction.get(userRef);
+      if(!userSnap.exists()) throw new Error("User not found");
+
+      const user = userSnap.data();
+      let bal = Number(user.walletBalance || 0);
+      let newBal = bal + amount;
+      let userUpdates = { walletBalance: newBal };
+
+      let referrerRef = null;
+      let refBal = 0;
+      let shouldReward = false;
+
+      if(user.referredBy && !user.firstDepositRewarded){
+        referrerRef = doc(db, "users", user.referredBy);
+        const referrerSnap = await transaction.get(referrerRef);
+        if(referrerSnap.exists()){
+          refBal = Number(referrerSnap.data().walletBalance || 0);
+          const bonus = Number(appSettings.referralBonus || 0);
+          newBal += bonus;
+          userUpdates.walletBalance = newBal;
+          userUpdates.firstDepositRewarded = true;
+          shouldReward = true;
+        }
+      }
+
+      transaction.update(userRef, userUpdates);
+      transaction.update(doc(db, "deposits", id), {
+        status: "Approved",
+        approvedAt: serverTimestamp(),
+        approvedBy: admin.uid
+      });
+
+      if(shouldReward && referrerRef){
+        transaction.update(referrerRef, { walletBalance: refBal + Number(appSettings.referralBonus || 0) });
+      }
+    });
+
+    await notifyUser(userId, "Deposit approved", `Your deposit of ₹${amount} has been approved and credited to your wallet.`);
+    await addLog("Deposit Approved", `₹${amount} - ${userId}`);
+    await loadUsers();
+    await loadDeposits();
+    renderUsers();
+    renderDeposits();
+    calculateDashboard();
+    alert("Deposit approved + wallet credited");
+  }catch(e){
+    console.error(e);
+    alert("Failed to approve: " + (e.message || "Unknown error"));
+  }
+};
+
+window.rejectDeposit = async function(id){
+  const deposit = deposits.find(d=>d.id===id);
+  const reason = prompt("Reject reason:") || "";
+  await updateDoc(doc(db,"deposits",id), { status:"Rejected", rejectReason:reason, rejectedAt:serverTimestamp() });
+  await notifyUser(deposit?.userId, "Deposit rejected", `Your deposit of ₹${Number(deposit?.amount||0)} was rejected.${reason ? " Reason: " + reason : ""}`);
+  if(deposit?.userId) await registerRejection(deposit.userId);
+  await loadDeposits(); await loadUsers();
+  renderDeposits(); renderUsers(); renderDepositLimit(); calculateDashboard();
+};
+
+/* ===== 5-REJECTION RESTRICTION (separate from Users block/unblock) ===== */
+const REJECTION_LIMIT = 5;
+async function registerRejection(userId){
+  try{
+    const ref = doc(db,"users",userId);
+    const snap = await getDoc(ref);
+    if(!snap.exists()) return;
+    const count = Number(snap.data().rejectionCount || 0) + 1;
+    await updateDoc(ref, { rejectionCount: count, isRestricted: count >= REJECTION_LIMIT });
+    if(count >= REJECTION_LIMIT) await addLog("User Restricted (5 rejections)", userId);
+  }catch(e){ console.error("registerRejection", e); }
+}
+
+window.renderDepositLimit = function(){
+  const box = document.getElementById("depositLimitTable");
+  if(!box) return;
+  const search = (document.getElementById("depositLimitSearch")?.value || "").toLowerCase();
+  let list = users.filter(u => u.isRestricted === true || Number(u.rejectionCount||0) >= REJECTION_LIMIT);
+  if(search){
+    list = list.filter(u =>
+      String(u.name||"").toLowerCase().includes(search) ||
+      String(u.email||"").toLowerCase().includes(search) ||
+      String(u.id||"").toLowerCase().includes(search));
+  }
+  if(!list.length){ box.innerHTML = `<tr><td colspan="5" class="empty">No restricted users</td></tr>`; return; }
+  box.innerHTML = list.map(u => `
+  <tr>
+    <td><div class="user-info"><div class="user-name">${esc(u.name||"-")}</div><div class="user-email">${esc(u.email||"-")}</div></div></td>
+    <td><div class="id-box"><div class="id-text">${esc(u.id)}</div><button class="btn copy" onclick="copyText('${esc(u.id)}')">Copy</button></div></td>
+    <td><span class="rej-pill">${Number(u.rejectionCount||0)} / ${REJECTION_LIMIT}</span></td>
+    <td><span class="status blocked">Restricted</span></td>
+    <td class="actions"><button class="btn small green" onclick="resetRejections('${u.id}')">Unblock / Reset</button></td>
+  </tr>`).join("");
+};
+
+window.resetRejections = async function(uid){
+  if(!confirm("Reset this user's rejection limit and restore their account?")) return;
+  await updateDoc(doc(db,"users",uid), { rejectionCount: 0, isRestricted: false });
+  await addLog("Rejection Limit Reset", uid);
+  await loadUsers(); renderDepositLimit(); renderUsers(); calculateDashboard();
+  alert("Account restored. 5 rejections available again.");
+};
+
+/* ===== LEADERBOARD ADMIN ===== */
+window.renderLeaderboardAdmin = function(){
+  const box = document.getElementById("leaderboardTable");
+  if(!box) return;
+  const counts = {};
+  users.forEach(u => { if(u.referredBy && u.firstDepositRewarded) counts[u.referredBy] = (counts[u.referredBy]||0)+1; });
+  const ranked = users
+    .map(u => ({ id:u.id, name:u.name || (u.email||"User"), count: counts[u.id] || 0 }))
+    .filter(u => u.count > 0)
+    .sort((a,b) => b.count - a.count);
+  if(!ranked.length){ box.innerHTML = `<tr><td colspan="5" class="empty">No successful referrals yet</td></tr>`; return; }
+  box.innerHTML = ranked.slice(0,50).map((u,i) => `
+  <tr>
+    <td><span class="rank-badge ${i===0?"gold":i===1?"silver":""}">${i+1}</span></td>
+    <td>${esc(u.name)}</td>
+    <td><div class="id-text">${esc(u.id)}</div></td>
+    <td>${u.count}</td>
+    <td class="money">${i===0?"₹"+Number(appSettings.rank1Bonus||0).toFixed(2):i===1?"₹"+Number(appSettings.rank2Bonus||0).toFixed(2):"-"}</td>
+  </tr>`).join("");
+};
+
+window.fillMonthlyBonusDayOptions = function(){
+  const sel = document.getElementById("settingMonthlyBonusDay");
+  if(!sel || sel.dataset.filled === "1") return;
+  const current = sel.value;
+  let html = '<option value="last">Last day of month</option>';
+  for(let d = 1; d <= 28; d++){
+    html += '<option value="' + d + '">Day ' + d + ' of month</option>';
+  }
+  sel.innerHTML = html;
+  sel.dataset.filled = "1";
+  if(current) sel.value = current;
+};
+
+window.saveLeaderboardSettings = async function(){
+  appSettings.leaderboardEnabled = document.getElementById("leaderboardToggle").checked;
+  appSettings.rank1Bonus = Number(document.getElementById("settingRank1Bonus").value || 0);
+  appSettings.rank2Bonus = Number(document.getElementById("settingRank2Bonus").value || 0);
+  fillMonthlyBonusDayOptions();
+  appSettings.weeklyBonusDay = Number(document.getElementById("settingWeeklyBonusDay").value || 0);
+  const md = document.getElementById("settingMonthlyBonusDay").value || "last";
+  appSettings.monthlyBonusDay = md === "last" ? "last" : Number(md);
+  await setDoc(doc(db,"settings","app"), {
+    leaderboardEnabled: appSettings.leaderboardEnabled,
+    rank1Bonus: appSettings.rank1Bonus,
+    rank2Bonus: appSettings.rank2Bonus,
+    weeklyBonusDay: appSettings.weeklyBonusDay,
+    monthlyBonusDay: appSettings.monthlyBonusDay,
+    updatedAt: serverTimestamp()
+  }, { merge:true });
+  renderLeaderboardAdmin();
+  alert("Leaderboard settings saved");
+};
+
+window.saveReferralBonus = async function(){
+  const amount = Number(document.getElementById("settingReferralBonus").value || 0);
+  if(amount < 0){ alert("Enter a valid amount"); return; }
+  appSettings.referralBonus = amount;
+  await setDoc(doc(db,"settings","app"), { referralBonus: amount, updatedAt: serverTimestamp() }, { merge:true });
+  alert("Referral bonus updated to ₹" + amount.toFixed(2));
+};
+
+/* ===== SOCIAL MEDIA BUTTONS ===== */
+window.renderSocialList = function(){
+  const box = document.getElementById("socialList");
+  if(!box) return;
+  const links = appSettings.socialLinks || [];
+  if(!links.length){ box.innerHTML = `<div class="empty">No social buttons added</div>`; return; }
+  box.innerHTML = links.map((l,i) => `
+    <div class="social-item">
+      ${l.imageUrl ? `<img class="social-logo-preview" src="${esc(l.imageUrl)}" alt="" onerror="this.style.display='none'">` : `<div class="social-logo-preview" style="display:flex;align-items:center;justify-content:center;font-weight:900">${esc((l.name||"L").charAt(0).toUpperCase())}</div>`}
+      <div style="flex:1;min-width:0">
+        <div class="si-name">${esc(l.name||"Link")}</div>
+        <div class="si-url">${esc(l.url||"")}</div>
+      </div>
+      <button class="btn small red" onclick="deleteSocialLink(${i})">Delete</button>
+    </div>`).join("");
+};
+
+window.addSocialLink = async function(){
+  const name = document.getElementById("socialName").value.trim();
+  const imageUrl = document.getElementById("socialImageUrl").value.trim();
+  const url = document.getElementById("socialUrl").value.trim();
+  if(!name || !url){ alert("Enter app name and link"); return; }
+  if(!/^https?:\/\//i.test(url)){ alert("Link must start with http:// or https://"); return; }
+  if(imageUrl && !/^https?:\/\//i.test(imageUrl)){ alert("Logo image URL must start with http:// or https://"); return; }
+  appSettings.socialLinks = [...(appSettings.socialLinks||[]), { name, imageUrl, url }];
+  await setDoc(doc(db,"settings","app"), { socialLinks: appSettings.socialLinks, updatedAt: serverTimestamp() }, { merge:true });
+  document.getElementById("socialName").value = "";
+  document.getElementById("socialImageUrl").value = "";
+  document.getElementById("socialUrl").value = "";
+  renderSocialList();
+  alert("Button added");
+};
+
+window.deleteSocialLink = async function(index){
+  if(!confirm("Delete this button?")) return;
+  appSettings.socialLinks = (appSettings.socialLinks||[]).filter((_,i) => i !== index);
+  await setDoc(doc(db,"settings","app"), { socialLinks: appSettings.socialLinks, updatedAt: serverTimestamp() }, { merge:true });
+  renderSocialList();
+};
+
+/* ===== SLIDE BANNER ===== */
+window.openBannerPage = function(btn){ openPage("bannerPage", btn); renderBannerList(); };
+window.renderBannerList = function(){
+  const box = document.getElementById("bannerList");
+  if(!box) return;
+  const list = appSettings.banners || [];
+  if(!list.length){ box.innerHTML = `<div class="empty">No banners added</div>`; return; }
+  box.innerHTML = list.map((b,i) => {
+    const url = typeof b === "string" ? b : (b.url || "");
+    const action = typeof b === "string" ? "none" : (b.action || "none");
+    const actionUrl = typeof b === "string" ? "" : (b.actionUrl || "");
+    return `<div class="social-item">
+      <img src="${esc(url)}" style="width:96px;aspect-ratio:16/9;object-fit:cover;border-radius:10px;background:#e2e8f0">
+      <div style="flex:1;min-width:0"><div class="si-url">${esc(url)}</div>
+        <div style="font-size:12px;color:#475569;margin-top:4px"><b>Action:</b> ${esc(action)}${actionUrl ? " \u2192 " + esc(actionUrl) : ""}</div>
+      </div>
+      <button class="btn small red" onclick="deleteBanner(${i})">Delete</button>
+    </div>`;
+  }).join("");
+};
+window.onBannerActionChange = function(){
+  const action = document.getElementById("bannerAction").value;
+  const box = document.getElementById("bannerActionUrl");
+  const needsUrl = ["telegram","youtube","playstore"].includes(action);
+  box.classList.toggle("hidden", !needsUrl);
+  if(!needsUrl) box.value = "";
+  box.placeholder = action === "telegram" ? "Telegram link (https://t.me/...) — leave blank to use Settings link"
+    : action === "youtube" ? "YouTube link (https://youtube.com/...)"
+    : action === "playstore" ? "Play Store link (https://play.google.com/...)" : "Destination URL (https://...)";
+};
+window.addBanner = async function(){
+  const input = document.getElementById("bannerUrl");
+  const url = input.value.trim();
+  const action = (document.getElementById("bannerAction")||{}).value || "none";
+  const actionUrl = ((document.getElementById("bannerActionUrl")||{}).value || "").trim();
+  if(!/^https?:\/\//i.test(url)){ alert("Enter a valid image URL starting with http:// or https://"); return; }
+  if(["youtube","playstore"].includes(action) && !/^https?:\/\//i.test(actionUrl)){ alert("Enter a valid destination URL"); return; }
+  if(action === "telegram" && actionUrl && !/^https?:\/\//i.test(actionUrl)){ alert("Enter a valid Telegram URL"); return; }
+  appSettings.banners = [...(appSettings.banners||[]), { url, action, actionUrl }];
+  await setDoc(doc(db,"settings","app"), { banners: appSettings.banners, updatedAt: serverTimestamp() }, { merge:true });
+  input.value = "";
+  const au = document.getElementById("bannerActionUrl"); if(au) au.value = "";
+  renderBannerList();
+  alert("Banner added");
+};
+window.deleteBanner = async function(index){
+  if(!confirm("Delete this banner?")) return;
+  appSettings.banners = (appSettings.banners||[]).filter((_,i) => i !== index);
+  await setDoc(doc(db,"settings","app"), { banners: appSettings.banners, updatedAt: serverTimestamp() }, { merge:true });
+  renderBannerList();
+};
+
+/* ===== APP USAGE GUIDES + ABOUT BUTTON ===== */
+let appGuides = [], editingGuideId = null;
+window.openGuidesPage = async function(btn){
+  openPage("guidesPage", btn);
+  const t = document.getElementById("aboutToggle");
+  const ti = document.getElementById("aboutTitleInput");
+  if(t) t.checked = appSettings.aboutEnabled === true;
+  if(ti) ti.value = appSettings.aboutTitle || "About";
+  await loadGuides();
+  renderGuides();
+};
+async function loadGuides(){
+  appGuides = [];
+  try{
+    const snap = await getDocs(collection(db,"appGuides"));
+    snap.forEach(d => appGuides.push({id:d.id, ...d.data()}));
+    appGuides.sort((a,b) => (a.createdAt?.seconds||0) - (b.createdAt?.seconds||0));
+  }catch(e){ console.error("loadGuides", e); }
+}
+function renderGuides(){
+  const box = document.getElementById("guidesList");
+  if(!box) return;
+  if(!appGuides.length){ box.innerHTML = `<div class="empty">No guides yet</div>`; return; }
+  box.innerHTML = appGuides.map(g => `<div class="social-item" style="align-items:flex-start">
+      <div style="flex:1;min-width:0">
+        <div style="font-weight:800">${esc(g.title||"Guide")}</div>
+        <div style="font-size:13px;color:#475569;margin-top:4px;white-space:pre-wrap">${esc(g.description||"")}</div>
+      </div>
+      <button class="btn small orange" onclick="editGuide('${g.id}')">Edit</button>
+      <button class="btn small red" onclick="deleteGuide('${g.id}')">Delete</button>
+    </div>`).join("");
+}
+window.saveGuide = async function(){
+  const title = document.getElementById("guideTitle").value.trim();
+  const description = document.getElementById("guideDesc").value.trim();
+  if(!title || !description) return alert("Enter title and description");
+  if(editingGuideId){
+    await updateDoc(doc(db,"appGuides", editingGuideId), { title, description, updatedAt: serverTimestamp() });
+    await addLog("Guide Updated", title);
+  } else {
+    await addDoc(collection(db,"appGuides"), { title, description, createdAt: serverTimestamp(), createdBy: admin.uid });
+    await addLog("Guide Created", title);
+  }
+  cancelEditGuide();
+  await loadGuides(); renderGuides();
+  alert("Guide saved");
+};
+window.editGuide = function(id){
+  const g = appGuides.find(x => x.id === id); if(!g) return;
+  editingGuideId = id;
+  document.getElementById("guideTitle").value = g.title || "";
+  document.getElementById("guideDesc").value = g.description || "";
+  document.getElementById("guideFormTitle").textContent = "Edit Guide Post";
+  document.getElementById("guideSaveBtn").textContent = "Update Guide";
+  document.getElementById("guideCancelBtn").style.display = "inline-block";
+};
+window.cancelEditGuide = function(){
+  editingGuideId = null;
+  document.getElementById("guideTitle").value = "";
+  document.getElementById("guideDesc").value = "";
+  document.getElementById("guideFormTitle").textContent = "Create Guide Post";
+  document.getElementById("guideSaveBtn").textContent = "Add Guide";
+  document.getElementById("guideCancelBtn").style.display = "none";
+};
+window.deleteGuide = async function(id){
+  if(!confirm("Delete this guide post?")) return;
+  await deleteDoc(doc(db,"appGuides",id));
+  await loadGuides(); renderGuides();
+};
+window.saveAboutSettings = async function(){
+  const enabled = document.getElementById("aboutToggle").checked;
+  const title = document.getElementById("aboutTitleInput").value.trim() || "About";
+  appSettings.aboutEnabled = enabled;
+  appSettings.aboutTitle = title;
+  await setDoc(doc(db,"settings","app"), { aboutEnabled: enabled, aboutTitle: title, updatedAt: serverTimestamp() }, { merge:true });
+  await addLog("About Button Updated", (enabled ? "ON" : "OFF") + " - " + title);
+  alert("About settings saved");
+};
+
+/* ===== USER NOTIFICATION HELPER ===== */
+async function notifyUser(userId, title, message){
+  if(!userId) return;
+  try{
+    await addDoc(collection(db,"notifications"), {
+      title, message, imageUrl:"", target: userId,
+      createdAt: serverTimestamp(), createdBy: admin?.uid || "system", readBy: []
+    });
+  }catch(e){ console.error("notifyUser", e); }
+}
+
+/* ===== WALLET DESIGN SWITCHER ===== */
+const WALLET_DESIGNS = [
+{name:"Midnight Gold",bg:"linear-gradient(140deg,#141a35,#242c56 52%,#11162c)",primary:"#c8942f",accent:"#ffe9a5"},
+{name:"Royal Violet",bg:"linear-gradient(135deg,#4c1d95,#7c3aed 60%,#312e81)",primary:"#7c3aed",accent:"#ede9fe"},
+{name:"Ocean Deep",bg:"linear-gradient(140deg,#0c4a6e,#0ea5e9 70%,#082f49)",primary:"#0284c7",accent:"#e0f2fe"},
+{name:"Emerald Luxe",bg:"linear-gradient(140deg,#064e3b,#10b981 75%,#022c22)",primary:"#059669",accent:"#d1fae5"},
+{name:"Sunset Blaze",bg:"linear-gradient(135deg,#7c2d12,#f97316 70%,#431407)",primary:"#ea580c",accent:"#ffedd5"},
+{name:"Rose Noir",bg:"linear-gradient(140deg,#4c0519,#e11d48 72%,#1f0210)",primary:"#e11d48",accent:"#ffe4e6"},
+{name:"Carbon Steel",bg:"linear-gradient(140deg,#111827,#374151 60%,#0b0f19)",primary:"#475569",accent:"#e5e7eb"},
+{name:"Frost Glass",bg:"linear-gradient(140deg,#334155,#64748b)",primary:"#64748b",accent:"#f8fafc"},
+{name:"Neon Cyber",bg:"linear-gradient(140deg,#0f172a,#1e1b4b 55%,#020617)",primary:"#06b6d4",accent:"#67e8f9"},
+{name:"Aurora",bg:"linear-gradient(135deg,#1e3a8a,#9333ea 55%,#0f766e)",primary:"#8b5cf6",accent:"#f5d0fe"},
+{name:"Amber Forge",bg:"linear-gradient(140deg,#78350f,#d97706 72%,#451a03)",primary:"#d97706",accent:"#fef3c7"},
+{name:"Plum Silk",bg:"linear-gradient(140deg,#3b0764,#a21caf 70%,#1e0333)",primary:"#a21caf",accent:"#fae8ff"},
+{name:"Forest Night",bg:"linear-gradient(140deg,#14532d,#166534 60%,#052e16)",primary:"#15803d",accent:"#dcfce7"},
+{name:"Crimson Card",bg:"linear-gradient(140deg,#450a0a,#b91c1c 72%,#1c0505)",primary:"#b91c1c",accent:"#fee2e2"},
+{name:"Indigo Minimal",bg:"linear-gradient(140deg,#1e1b4b,#3730a3 70%,#0f0d2b)",primary:"#4338ca",accent:"#e0e7ff"},
+{name:"Champagne",bg:"linear-gradient(140deg,#292524,#57534e 60%,#1c1917)",primary:"#a16207",accent:"#f5e6c8"},
+{name:"Teal Wave",bg:"linear-gradient(140deg,#134e4a,#0d9488 72%,#042f2e)",primary:"#0d9488",accent:"#ccfbf1"},
+{name:"Slate Pro",bg:"linear-gradient(140deg,#1e293b,#475569 65%,#0f172a)",primary:"#2563eb",accent:"#f1f5f9"},
+{name:"Magma",bg:"linear-gradient(140deg,#18181b,#dc2626 85%,#450a0a)",primary:"#dc2626",accent:"#fecaca"},
+{name:"Pearl Light",bg:"linear-gradient(140deg,#e2e8f0,#f8fafc 60%,#cbd5e1)",primary:"#4f46e5",accent:"#0f172a"},
+{name:"Ruby Night",bg:"linear-gradient(140deg,#3f0712,#9f1239 62%,#20030a)",primary:"#be123c",accent:"#ffe4e6"},
+{name:"Arctic Blue",bg:"linear-gradient(140deg,#0c4a6e,#38bdf8 62%,#e0f2fe)",primary:"#0369a1",accent:"#f0f9ff"},
+{name:"Lime Circuit",bg:"linear-gradient(140deg,#1a2e05,#65a30d 68%,#0f1a04)",primary:"#65a30d",accent:"#ecfccb"},
+{name:"Copper Ember",bg:"linear-gradient(140deg,#431407,#c2410c 62%,#7c2d12)",primary:"#c2410c",accent:"#ffedd5"},
+{name:"Pink Pulse",bg:"linear-gradient(140deg,#500724,#db2777 65%,#831843)",primary:"#db2777",accent:"#fce7f3"},
+{name:"Mint Frost",bg:"linear-gradient(140deg,#064e3b,#2dd4bf 60%,#ccfbf1)",primary:"#0f766e",accent:"#f0fdfa"},
+{name:"Solar Flare",bg:"linear-gradient(140deg,#713f12,#eab308 62%,#fef08a)",primary:"#ca8a04",accent:"#422006"},
+{name:"Blue Steel",bg:"linear-gradient(140deg,#172554,#2563eb 64%,#1e3a8a)",primary:"#2563eb",accent:"#dbeafe"},
+{name:"Grape Soda",bg:"linear-gradient(140deg,#2e1065,#c026d3 64%,#701a75)",primary:"#c026d3",accent:"#fae8ff"},
+{name:"Graphite Gold",bg:"linear-gradient(140deg,#09090b,#3f3f46 60%,#18181b)",primary:"#ca8a04",accent:"#fef3c7"}
+];
+window.openDesignPage = function(btn){ openPage("designPage", btn); renderDesignList(); };
+window.renderDesignList = function(){
+  const box = document.getElementById("designList");
+  if(!box) return;
+  const active = Number(appSettings.walletDesign || 1);
+  box.innerHTML = WALLET_DESIGNS.map((d,i) => {
+    const n = i + 1;
+    return `<div class="social-item">
+      <div class="design-swatch" style="background:${d.bg}"></div>
+      <div style="flex:1;min-width:0"><div class="si-name">${n}. ${esc(d.name)}</div><div class="si-url">Wallet, Deposit & Withdraw layout</div></div>
+      <button class="btn small ${n===active?"green":"gray"}" onclick="setWalletDesign(${n})">${n===active?"Active":"Use"}</button>
+    </div>`;
+  }).join("");
+};
+window.setWalletDesign = async function(n){
+  appSettings.walletDesign = Number(n);
+  await setDoc(doc(db,"settings","app"), { walletDesign: appSettings.walletDesign, updatedAt: serverTimestamp() }, { merge:true });
+  renderDesignList();
+};
+
+window.setWithdrawalFilter = function(f,b){ withdrawalFilter=f; document.querySelectorAll("#withdrawalsPage .filter-btn").forEach(x=>x.classList.remove("active")); if(b)b.classList.add("active"); renderWithdrawals(); };
+function renderWithdrawals(){
+  const box = document.getElementById("withdrawalsTable");
+  let list = withdrawalFilter==="All" ? withdrawals : withdrawals.filter(w=>String(w.status||"Pending")===withdrawalFilter);
+  const wq=(document.getElementById("withdrawalSearch")?.value||"").toLowerCase().trim();
+  if(wq) list=list.filter(w=>(w.userName||"").toLowerCase().includes(wq)||String(w.userId||"").toLowerCase().includes(wq)||(w.userEmail||"").toLowerCase().includes(wq));
+  if(!list.length){ box.innerHTML=`<tr><td colspan="7" class="empty">No withdrawals</td></tr>`; return; }
+  box.innerHTML = list.map(w=>{
+    const uid = w.userId||"-";
+    return `<tr>
+      <td><div class="user-info"><div class="user-name">${esc(w.userName||"-")}</div><div class="user-email">${esc(w.userEmail||"-")} <button class="btn copy" onclick="copyText('${esc(w.userEmail||"")}',this)">Copy</button></div></div></td>
+      <td><div class="id-text">${esc(uid)}</div> <button class="btn copy" onclick="copyText('${esc(uid)}',this)">Copy</button></td>
+      <td class="money">₹${Number(w.amount||0).toFixed(2)}</td>
+      <td>${esc(w.upiId||"-")}</td>
+      <td><span class="status ${statusClass(w.status)}">${esc(w.status||"Pending")}</span></td>
+      <td>${esc(w.transactionId||"-")}</td>
+      <td>${w.status==="Pending"?`<div class="actions"><button class="btn small green" onclick="approveWithdrawal('${w.id}')">Approve</button><button class="btn small red" onclick="rejectWithdrawal('${w.id}')">Reject</button></div>`:
+           w.status==="Approved"?`<button class="btn small orange" onclick="markWithdrawalPaid('${w.id}')">Mark Paid</button>`:"-"}</td>
+    </tr>`;
+  }).join("");
+}
+window.approveWithdrawal = async function(id){
+  const w = withdrawals.find(x=>x.id===id);
+  if(!w || w.status!=="Pending") return;
+  const userId = w.userId;
+  const amount = Number(w.amount||0);
+  try{
+    await runTransaction(db, async (transaction) => {
+      const userRef = doc(db,"users",userId);
+      const userSnap = await transaction.get(userRef);
+      if(!userSnap.exists()) throw new Error("User not found");
+      if(!w.balanceDeducted && !w.fundsHeld){
+        const winBal = Number(userSnap.data().winningBalance||0);
+        if(winBal < amount) throw new Error("Insufficient Winning Balance");
+        transaction.update(userRef, { winningBalance: winBal - amount });
+      }
+      transaction.update(doc(db,"withdrawals",id), { status:"Approved", fundsHeld:true, approvedAt:serverTimestamp() });
+    });
+    await notifyUser(userId, "Withdrawal approved", `Your withdrawal of ₹${amount} has been approved and is being processed.`);
+    await loadUsers(); await loadWithdrawals(); renderUsers(); renderWithdrawals(); calculateDashboard();
+    alert("Withdrawal approved");
+  }catch(e){ alert(e.message || "Failed"); }
+};
+window.rejectWithdrawal = async function(id){
+  const w = withdrawals.find(x=>x.id===id);
+  if(!w || w.status!=="Pending") return;
+  const reason = prompt("Reject reason:") || "";
+  try{
+    await runTransaction(db, async (transaction) => {
+      const userRef = doc(db,"users",w.userId);
+      const userSnap = await transaction.get(userRef);
+      if(userSnap.exists() && (w.balanceDeducted || w.fundsHeld)){
+        const winBal = Number(userSnap.data().winningBalance||0);
+        transaction.update(userRef, { winningBalance: winBal + Number(w.amount||0) });
+      }
+      transaction.update(doc(db,"withdrawals",id), { status:"Rejected", rejectReason:reason, rejectedAt:serverTimestamp() });
+    });
+    await notifyUser(w.userId, "Withdrawal rejected", `Your withdrawal of ₹${Number(w.amount||0)} was rejected and the amount was returned to your wallet.${reason ? " Reason: " + reason : ""}`);
+    await registerRejection(w.userId);
+    await loadUsers(); await loadWithdrawals(); renderUsers(); renderWithdrawals(); renderDepositLimit(); calculateDashboard();
+    alert("Rejected & refunded");
+  }catch(e){ alert("Failed"); }
+};
+window.markWithdrawalPaid = async function(id){
+  const tx = prompt("Transaction / Reference ID:");
+  if(!tx) return;
+  await updateDoc(doc(db,"withdrawals",id), { status:"Paid", transactionId:tx.trim(), paidAt:serverTimestamp() });
+  const paidW = withdrawals.find(x => x.id === id);
+  await notifyUser(paidW?.userId, "Withdrawal paid", `Your withdrawal of ₹${Number(paidW?.amount||0)} has been paid. Reference: ${tx.trim()}`);
+  await loadWithdrawals(); renderWithdrawals(); calculateDashboard();
+  alert("Marked as Paid");
+};
+
+/* ========== TOURNAMENT ========== */
+
+/* ========== GAME CATEGORIES ========== */
+function renderCategories(){
+  const box = document.getElementById("categoriesList");
+  if(!box) return;
+  if(!categories.length){ box.innerHTML = `<div class="card empty">No categories yet. Create one above.</div>`; return; }
+  box.innerHTML = categories.map(c => {
+    const count = tournaments.filter(t => t.categoryId === c.id).length;
+    return `<div class="t-card">
+      <img src="${esc(c.imageUrl||"")}" style="cursor:pointer" onclick="openCategory('${c.id}')" onerror="this.src='https://dummyimage.com/800x450/e2e8f0/64748b&text=TMGame'">
+      <div class="t-body">
+        <h3 style="font-size:17px;font-weight:800;margin-bottom:8px;cursor:pointer" onclick="openCategory('${c.id}')">${esc(c.name)}</h3>
+        <div class="badges">
+          ${c.gameName ? `<span class="badge">${esc(c.gameName)}</span>` : ""}
+          ${c.mode ? `<span class="badge">${esc(c.mode)}</span>` : ""}
+          <span class="badge">${count} Tournaments</span>
+        </div>
+        ${c.description ? `<div style="font-size:13px;color:#475569;margin-top:6px">${esc(c.description)}</div>` : ""}
+        <div class="actions" style="margin-top:14px">
+          <button class="btn small dark" onclick="openCategory('${c.id}')">Open & Add Match</button>
+          <button class="btn small orange" onclick="editCategory('${c.id}')">Edit</button>
+          <button class="btn small red" onclick="deleteCategory('${c.id}')">Delete</button>
+        </div>
+      </div>
+    </div>`;
+  }).join("");
+}
+
+window.saveCategory = async function(){
+  const name = document.getElementById("cName").value.trim();
+  if(!name) return alert("Enter category name");
+  const data = {
+    name,
+    imageUrl: document.getElementById("cImage").value.trim(),
+    updatedAt: serverTimestamp()
+  };
+  if(editingCategoryId){
+    await updateDoc(doc(db,"gameCategories", editingCategoryId), data);
+    await addLog("Category Updated", name);
+  } else {
+    data.createdAt = serverTimestamp();
+    data.createdBy = admin.uid;
+    await addDoc(collection(db,"gameCategories"), data);
+    await addLog("Category Created", name);
+  }
+  cancelEditCategory();
+  await loadCategories(); renderCategories();
+  alert("Category saved");
+};
+
+window.editCategory = function(id){
+  const c = categories.find(x=>x.id===id); if(!c) return;
+  editingCategoryId = id;
+  document.getElementById("cName").value = c.name||"";
+  document.getElementById("cImage").value = c.imageUrl||"";
+  document.getElementById("categoryFormTitle").textContent = "Edit Category";
+  document.getElementById("categorySaveBtn").textContent = "Update Category";
+  document.getElementById("categoryCancelEditBtn").style.display = "inline-block";
+  document.getElementById("categoryFormTitle").scrollIntoView({behavior:"smooth", block:"start"});
+};
+
+window.cancelEditCategory = function(){
+  editingCategoryId = null;
+  ["cName","cImage"].forEach(id=>{ const el=document.getElementById(id); if(el) el.value=""; });
+  document.getElementById("categoryFormTitle").textContent = "Create Category";
+  document.getElementById("categorySaveBtn").textContent = "Create Category";
+  document.getElementById("categoryCancelEditBtn").style.display = "none";
+};
+
+window.deleteCategory = async function(id){
+  if(!confirm("Delete this category? Tournaments inside will NOT be deleted.")) return;
+  await deleteDoc(doc(db,"gameCategories",id));
+  if(currentCategoryId === id) currentCategoryId = null;
+  await loadCategories(); renderCategories();
+};
+
+window.openCategoriesPage = function(btn){
+  currentCategoryId = null;
+  const b = btn || [...document.querySelectorAll(".side-btn")].find(x=>x.getAttribute("onclick")?.includes("openCategoriesPage"));
+  openPage("categoriesPage", b);
+  renderCategories();
+};
+
+window.openAllTournaments = function(btn){
+  currentCategoryId = null;
+  cancelEditTournament();
+  openPage("tournamentsPage", btn);
+  updateTournamentContext();
+  renderTournaments();
+};
+
+window.openCategory = function(id){
+  currentCategoryId = id;
+  cancelEditTournament();
+  const btn = [...document.querySelectorAll(".side-btn")].find(x=>x.getAttribute("onclick")?.includes("openAllTournaments"));
+  openPage("tournamentsPage", btn);
+  updateTournamentContext();
+  renderTournaments();
+};
+
+function currentCategory(){ return categories.find(c => c.id === currentCategoryId) || null; }
+
+function updateTournamentContext(){
+  const c = currentCategory();
+  const bar = document.getElementById("categoryContextBar");
+  const title = document.getElementById("tournamentsPageTitle");
+  const saveBtn = document.getElementById("tournamentSaveBtn");
+  if(c){
+    bar.style.display = "block";
+    document.getElementById("categoryContextName").textContent = "Category: " + c.name;
+    title.textContent = c.name + " — Matches";
+    if(saveBtn) saveBtn.disabled = false;
+  } else {
+    bar.style.display = "none";
+    title.textContent = "All Tournaments";
+    if(saveBtn) saveBtn.disabled = false;
+  }
+}
+
+window.saveTournament = async function(){
+  const name = document.getElementById("tName").value.trim();
+  if(!name) return alert("Enter name");
+  const cat = currentCategory();
+  if(!editingTournamentId && !cat) return alert("Open a game category first, then add the match inside it.");
+  const slots = Number(document.getElementById("tSlots").value||0);
+  const matchOpen = document.getElementById("tMatchOpen").value === "true";
+
+  const data = {
+    name,
+    categoryId: cat ? cat.id : (tournaments.find(x=>x.id===editingTournamentId)?.categoryId || null),
+    categoryName: cat ? cat.name : (tournaments.find(x=>x.id===editingTournamentId)?.categoryName || ""),
+    gameName: cat ? (cat.gameName || cat.name) : (tournaments.find(x=>x.id===editingTournamentId)?.gameName || ""),
+    mode: document.getElementById("tMode").value.trim() || "Solo",
+    mapType: document.getElementById("tMap").value,
+    matchTime: document.getElementById("tDateTime").value,
+    registrationEnd: document.getElementById("tRegistrationEnd").value,
+    matchEnding: document.getElementById("tMatchEnding").value,
+    entryType: document.getElementById("tEntryType").value,
+    entryFee: document.getElementById("tEntryType").value==="Free" ? 0 : Number(document.getElementById("tEntryFee").value||0),
+    prize: Number(document.getElementById("tPrize").value||0),
+    totalSlots: slots,
+    customOption1: document.getElementById("tCustom1").value.trim(),
+    customOption2: document.getElementById("tCustom2").value.trim(),
+    imageUrl: document.getElementById("tBanner").value,
+    roomId: document.getElementById("tRoomId").value,
+    roomPass: document.getElementById("tRoomPass").value,
+    roomReleaseTime: document.getElementById("tRoomRelease").value,
+    status: document.getElementById("tStatus").value,
+    matchOpen: matchOpen,
+    rules: document.getElementById("tRules").value,
+    prizeDistribution: document.getElementById("tPrizeDistribution").value,
+    updatedAt: serverTimestamp()
+  };
+
+  if(editingTournamentId){
+    await updateDoc(doc(db,"tournaments", editingTournamentId), data);
+    await addLog("Tournament Updated", name);
+    if(data.status === "Cancel Match"){
+      await processCancelRefunds(editingTournamentId);
+    }
+    alert("Tournament updated successfully");
+  } else {
+    data.roomVisible = false;
+    data.takenSeats = {};
+    data.joinedCount = 0;
+    data.winnersList = [];
+    data.createdAt = serverTimestamp();
+    data.createdBy = admin.uid;
+    await addDoc(collection(db,"tournaments"), data);
+    await addLog("Tournament Created", name);
+    alert("Tournament created");
+  }
+
+  cancelEditTournament();
+  await loadTournaments(); renderTournaments(); renderCategories(); calculateDashboard();
+};
+
+async function processCancelRefunds(tournamentId){
+  const parts = participants.filter(p => p.tournamentId === tournamentId && !p.refunded && Number(p.entryFee||0) > 0);
+  for(const p of parts){
+    try{
+      await runTransaction(db, async (transaction) => {
+        const userRef = doc(db,"users", p.userId);
+        const partRef = doc(db,"tournamentParticipants", p.id);
+        const userSnap = await transaction.get(userRef);
+        if(!userSnap.exists()) return;
+        const bal = Number(userSnap.data().walletBalance||0);
+        const fee = Number(p.entryFee||0);
+        transaction.update(userRef, { walletBalance: bal + fee });
+        transaction.update(partRef, { result: "REFUND", refunded: true, refundAmount: fee, resultAt: serverTimestamp() });
+      });
+      await addDoc(collection(db,"walletTransactions"), {
+        userId: p.userId, type: "tournament_refund", amount: Number(p.entryFee||0), reason: "Tournament cancelled - entry fee refund", createdAt: serverTimestamp()
+      });
+      await notifyUser(p.userId, "Match cancelled", `Match Cancelled \u2013 Entry fee of ₹${Number(p.entryFee||0)} refunded to your wallet.`);
+    }catch(e){ console.error("Refund failed for", p.userId, e); }
+  }
+  await loadParticipants(); await loadUsers();
+}
+
+window.editTournament = function(id){
+  const t = tournaments.find(x => x.id === id);
+  if(!t) return;
+  editingTournamentId = id;
+
+  document.getElementById("tName").value = t.name || "";
+  document.getElementById("tMode").value = t.mode || "";
+  document.getElementById("tMap").value = t.mapType || "";
+  document.getElementById("tDateTime").value = t.matchTime ? String(t.matchTime).slice(0,16) : "";
+  document.getElementById("tRegistrationEnd").value = t.registrationEnd ? String(t.registrationEnd).slice(0,16) : "";
+  document.getElementById("tMatchEnding").value = t.matchEnding ? String(t.matchEnding).slice(0,16) : "";
+  document.getElementById("tEntryType").value = t.entryType || "Free";
+  document.getElementById("tEntryFee").value = t.entryFee || 0;
+  document.getElementById("tPrize").value = t.prize || 0;
+  document.getElementById("tSlots").value = t.totalSlots || "";
+  document.getElementById("tCustom1").value = t.customOption1 || "";
+  document.getElementById("tCustom2").value = t.customOption2 || "";
+  document.getElementById("tBanner").value = t.imageUrl || "";
+  document.getElementById("tRoomId").value = t.roomId || "";
+  document.getElementById("tRoomPass").value = t.roomPass || "";
+  document.getElementById("tRoomRelease").value = t.roomReleaseTime ? String(t.roomReleaseTime).slice(0,16) : "";
+  document.getElementById("tStatus").value = t.status || "Upcoming";
+  document.getElementById("tMatchOpen").value = t.matchOpen === false ? "false" : "true";
+  document.getElementById("tRules").value = t.rules || "";
+  document.getElementById("tPrizeDistribution").value = t.prizeDistribution || "";
+
+  document.getElementById("tournamentFormTitle").textContent = "Edit Tournament";
+  document.getElementById("tournamentSaveBtn").textContent = "Update Tournament";
+  document.getElementById("tournamentCancelEditBtn").style.display = "inline-block";
+
+  document.getElementById("tournamentFormTitle").scrollIntoView({behavior:"smooth", block:"start"});
+};
+
+window.cancelEditTournament = function(){
+  editingTournamentId = null;
+  clearTournamentForm();
+  document.getElementById("tournamentFormTitle").textContent = "Create Tournament";
+  document.getElementById("tournamentSaveBtn").textContent = "Create Tournament";
+  document.getElementById("tournamentCancelEditBtn").style.display = "none";
+};
+
+function isMatchClosed(t){
+  if(t.matchOpen === false) return true;
+  if(t.matchEnding){
+    const matchDate = new Date(t.matchEnding);
+    if(!isNaN(matchDate) && matchDate.getTime() < Date.now()) return true;
+  }
+  return false;
+}
+
+function renderTournaments(){
+  const box = document.getElementById("tournamentsList");
+  const list = currentCategoryId ? tournaments.filter(t => t.categoryId === currentCategoryId) : tournaments;
+  if(!list.length){ box.innerHTML = `<div class="card empty">No tournaments</div>`; return; }
+  box.innerHTML = list.map(t => {
+    const joined = participants.filter(p => p.tournamentId === t.id).length;
+    const closed = isMatchClosed(t);
+    return `<div class="t-card">
+      ${t.imageUrl ? `<img src="${esc(t.imageUrl)}" onerror="this.src='https://dummyimage.com/800x450/e2e8f0/64748b&text=TMGame'">` : ""}
+      <div class="t-body">
+        <h3 style="font-size:17px;font-weight:800;margin-bottom:8px">${esc(t.name)}</h3>
+        <div class="badges">
+          <span class="badge">${esc(t.gameName)}</span>
+          <span class="badge">${esc(t.mode)}</span>
+          <span class="badge">${esc(t.entryType)}</span>
+          <span class="badge">Slots ${joined}/${t.totalSlots||"∞"}</span>
+          ${closed ? `<span class="badge" style="background:#fee2e2;color:#991b1b">Match Closed</span>` : `<span class="badge" style="background:#dcfce7;color:#166534">Match ON</span>`}
+          ${String(t.status||"") === "Cancel Match" ? `<span class="badge" style="background:#fef2f2;color:#b91c1c;border:1px solid #fecaca">Match Cancelled \u2013 Entry fee refunded to wallet.</span>` : ""}
+          ${t.customOption1 ? `<span class="badge">${esc(t.customOption1)}</span>` : ""}
+          ${t.customOption2 ? `<span class="badge">${esc(t.customOption2)}</span>` : ""}
+        </div>
+        <div style="font-size:13px;line-height:1.7;color:#475569">
+           <b>Starting Match:</b> ${esc(formatDate(t.registrationEnd))}<br>
+           <b>Match Ending:</b> ${esc(formatDate(t.matchEnding))}<br>
+          <b>Entry:</b> ₹${Number(t.entryFee||0)} | <b>Prize:</b> ₹${Number(t.prize||0)}<br>
+          <b>Location:</b> ${esc(t.mapType||"-")}
+        </div>
+        <div class="actions" style="margin-top:14px">
+          <button class="btn small green" onclick="toggleRoom('${t.id}')">${t.roomVisible?"Hide Room":"Release Room"}</button>
+          <button class="btn small dark" onclick="viewPlayers('${t.id}')">Players (${joined})</button>
+          <button class="btn small orange" onclick="editTournament('${t.id}')">Edit</button>
+          <button class="btn small red" onclick="deleteTournament('${t.id}')">Delete</button>
+        </div>
+      </div>
+    </div>`;
+  }).join("");
+}
+window.toggleRoom = async function(id){
+  const t = tournaments.find(x=>x.id===id);
+  if(!t) return;
+  await updateDoc(doc(db,"tournaments",id), { roomVisible: !t.roomVisible });
+  await loadTournaments(); renderTournaments();
+};
+window.deleteTournament = async function(id){
+  if(!confirm("Delete this tournament?")) return;
+  await deleteDoc(doc(db,"tournaments",id));
+  await loadTournaments(); renderTournaments(); renderCategories(); calculateDashboard();
+};
+
+window.viewPlayers = function(id){
+  const t = tournaments.find(x=>x.id===id);
+  const list = participants.filter(p => p.tournamentId === id);
+  document.getElementById("playerModalTitle").textContent = (t?.name || "Tournament") + " — Players";
+  let html = `<div class="info-box">Total joined: ${list.length} / ${t?.totalSlots || "∞"}</div>`;
+  if(list.length) html += `<div style="margin:10px 0"><button class="btn red" onclick="cancelAllUsers('${id}')">Cancel All Users</button></div>`;
+  if(!list.length) html += `<div class="empty">No players yet</div>`;
+  else {
+    html += `<div class="table-wrap"><table><thead><tr><th>#</th><th>Name</th><th>Gaming ID</th><th>Seat</th><th>Entry</th><th>Result</th><th>Action</th></tr></thead><tbody>`;
+    list.forEach((p,i) => {
+      html += `<tr>
+        <td>${i+1}</td>
+        <td>${esc(p.userName || "-")}</td>
+        <td><strong>${esc(p.gamingId || "-")}</strong></td>
+        <td>${p.seatNumber || "-"}</td>
+        <td>₹${Number(p.entryFee||0)}</td>
+        <td>${p.result || "-"} ${p.winAmount ? "₹"+p.winAmount : ""}</td>
+        <td class="actions">
+          <button class="btn small green" onclick="markWin('${t.id}','${p.id}','${p.userId}')">WIN</button>
+          <button class="btn small red" onclick="markLoss('${t.id}','${p.id}')">LOSS</button>
+          <button class="btn small" style="background:#eab308;color:#fff" onclick="markRefund('${t.id}','${p.id}','${p.userId}')">Refund</button>
+          <button class="btn small" style="background:#b91c1c;color:#fff" onclick="cancelUser('${t.id}','${p.id}','${p.userId}')">Cancel User</button>
+        </td>
+      </tr>`;
+    });
+    html += `</tbody></table></div>`;
+  }
+  document.getElementById("playerModalContent").innerHTML = html;
+  document.getElementById("playerModal").classList.remove("hidden");
+};
+window.closePlayerModal = function(){ document.getElementById("playerModal").classList.add("hidden"); };
+
+window.markWin = async function(tournamentId, participantId, userId){
+  const amount = Number(prompt("Winning amount to credit:"));
+  if(!amount || amount <= 0) return;
+  try{
+    await runTransaction(db, async (transaction) => {
+      const userRef = doc(db,"users",userId);
+      const partRef = doc(db,"tournamentParticipants",participantId);
+      const userSnap = await transaction.get(userRef);
+      if(!userSnap.exists()) throw new Error("User not found");
+      const winBal = Number(userSnap.data().winningBalance||0);
+      transaction.update(userRef, { winningBalance: winBal + amount });
+      transaction.update(partRef, { result: "WIN", winAmount: amount, resultAt: serverTimestamp() });
+    });
+    await addDoc(collection(db,"walletTransactions"), {
+      userId, type: "prize_win", amount, reason: "Tournament win", createdAt: serverTimestamp()
+    });
+    await addLog("Prize Credited", `₹${amount} to ${userId}`);
+    await loadParticipants(); await loadUsers();
+    viewPlayers(tournamentId);
+    calculateDashboard();
+    alert("WIN recorded and amount credited");
+  }catch(e){ alert(e.message || "Failed"); }
+};
+window.markLoss = async function(tournamentId, participantId){
+  await updateDoc(doc(db,"tournamentParticipants",participantId), { result: "LOSS", resultAt: serverTimestamp() });
+  await loadParticipants();
+  viewPlayers(tournamentId);
+  alert("Marked as LOSS");
+};
+
+window.markRefund = async function(tournamentId, participantId, userId){
+  const p = participants.find(x => x.id === participantId);
+  if(!p) return alert("Participant not found");
+  const fee = Number(p.entryFee || 0);
+  if(fee <= 0) return alert("No entry fee to refund (Free tournament)");
+  if(p.refunded) return alert("Already refunded");
+  if(!confirm(`Refund ₹${fee} to this user?`)) return;
+  try{
+    await runTransaction(db, async (transaction) => {
+      const userRef = doc(db,"users",userId);
+      const partRef = doc(db,"tournamentParticipants",participantId);
+      const userSnap = await transaction.get(userRef);
+      if(!userSnap.exists()) throw new Error("User not found");
+      const bal = Number(userSnap.data().walletBalance||0);
+      transaction.update(userRef, { walletBalance: bal + fee });
+      transaction.update(partRef, { result: "REFUND", refunded: true, refundAmount: fee, resultAt: serverTimestamp() });
+    });
+    await addDoc(collection(db,"walletTransactions"), {
+      userId, type: "tournament_refund", amount: fee, reason: "Tournament entry fee refund", createdAt: serverTimestamp()
+    });
+    await addLog("Refund Issued", `₹${fee} to ${userId}`);
+    await loadParticipants(); await loadUsers();
+    viewPlayers(tournamentId);
+    calculateDashboard();
+    alert("Refund successful");
+  }catch(e){ alert(e.message || "Failed"); }
+};
+
+window.cancelUser = async function(tournamentId, participantId, userId){
+  const p = participants.find(x => x.id === participantId);
+  if(!p) return alert("Participant not found");
+  if(String(p.result||"").toUpperCase() === "CANCELLED") return alert("This user is already cancelled");
+  const fee = Number(p.entryFee || 0);
+  if(!confirm(fee > 0 ? `Cancel this user and refund ₹${fee} to their wallet?` : "Cancel this user? (Free tournament – no refund)")) return;
+  try{
+    await runTransaction(db, async (transaction) => {
+      const userRef = doc(db,"users",userId);
+      const partRef = doc(db,"tournamentParticipants",participantId);
+      const userSnap = await transaction.get(userRef);
+      if(!userSnap.exists()) throw new Error("User not found");
+      if(fee > 0 && !p.refunded){
+        const bal = Number(userSnap.data().walletBalance||0);
+        transaction.update(userRef, { walletBalance: bal + fee });
+        transaction.update(partRef, { result: "CANCELLED", cancelled: true, refunded: true, refundAmount: fee, resultAt: serverTimestamp() });
+      } else {
+        transaction.update(partRef, { result: "CANCELLED", cancelled: true, resultAt: serverTimestamp() });
+      }
+    });
+    if(fee > 0 && !p.refunded){
+      await addDoc(collection(db,"walletTransactions"), {
+        userId, type: "tournament_refund", amount: fee, reason: "Match cancelled - entry fee refund", createdAt: serverTimestamp()
+      });
+    }
+    await notifyUser(userId, "Match cancelled", `Match Cancelled \u2013 Entry fee of ₹${fee} refunded to your wallet.`);
+    await addLog("User Cancelled", `${userId} cancelled${fee>0?` – ₹${fee} refunded`:""}`);
+    await loadParticipants(); await loadUsers();
+    viewPlayers(tournamentId);
+    calculateDashboard();
+    alert("User cancelled" + (fee > 0 ? " and entry fee refunded" : ""));
+  }catch(e){ alert(e.message || "Failed"); }
+};
+
+window.cancelAllUsers = async function(tournamentId){
+  const list = participants.filter(x => x.tournamentId === tournamentId && String(x.result||"").toUpperCase() !== "CANCELLED");
+  if(!list.length) return alert("No users left to cancel");
+  if(!confirm(`Cancel all ${list.length} joined user(s) and refund their entry fees?`)) return;
+  let done = 0, failed = 0;
+  for(const p of list){
+    const fee = Number(p.entryFee || 0);
+    try{
+      await runTransaction(db, async (transaction) => {
+        const userRef = doc(db,"users",p.userId);
+        const partRef = doc(db,"tournamentParticipants",p.id);
+        const userSnap = await transaction.get(userRef);
+        if(!userSnap.exists()) throw new Error("User not found");
+        if(fee > 0 && !p.refunded){
+          const bal = Number(userSnap.data().walletBalance||0);
+          transaction.update(userRef, { walletBalance: bal + fee });
+          transaction.update(partRef, { result: "CANCELLED", cancelled: true, refunded: true, refundAmount: fee, resultAt: serverTimestamp() });
+        } else {
+          transaction.update(partRef, { result: "CANCELLED", cancelled: true, resultAt: serverTimestamp() });
+        }
+      });
+      if(fee > 0 && !p.refunded){
+        await addDoc(collection(db,"walletTransactions"), {
+          userId: p.userId, type: "tournament_refund", amount: fee, reason: "Match cancelled - entry fee refund", createdAt: serverTimestamp()
+        });
+      }
+      await notifyUser(p.userId, "Match cancelled", `Match Cancelled \u2013 Entry fee of ₹${fee} refunded to your wallet.`);
+      done++;
+    }catch(e){ console.error("Cancel failed for", p.userId, e); failed++; }
+  }
+  await addLog("All Users Cancelled", `${done} cancelled in tournament ${tournamentId}`);
+  await loadParticipants(); await loadUsers();
+  viewPlayers(tournamentId);
+  calculateDashboard();
+  alert(`Cancelled ${done} user(s)${failed?`, ${failed} failed`:""} – entry fees refunded`);
+};
+
+window.openAppUpdatePage = function(btn){ openPage("appUpdatePage",btn); renderAppUpdateForm(); };
+function renderAppUpdateForm(){
+  const u=appSettings.appUpdate||{};
+  const status=document.getElementById("appUpdateStatus");
+  if(!status) return;
+  document.getElementById("updateVersion").value=u.version||"";
+  document.getElementById("updateMessage").value=u.message||"";
+  document.getElementById("updateDownloadUrl").value=u.downloadUrl||"";
+  const typeSel=document.getElementById("updateLinkType");
+  if(typeSel){ typeSel.value=u.linkType||"playstore"; onUpdateLinkTypeChange(); }
+  status.textContent=u.enabled ? "Published: "+(u.version||"Current update") : "No update published";
+  status.classList.toggle("on",u.enabled===true);
+}
+window.onUpdateLinkTypeChange = function(){
+  const typeSel=document.getElementById("updateLinkType");
+  const input=document.getElementById("updateDownloadUrl");
+  if(!typeSel||!input) return;
+  const t=typeSel.value;
+  input.placeholder = t==="playstore" ? "Play Store URL (https://play.google.com/store/apps/details?id=...)"
+    : t==="telegram" ? "Telegram URL (https://t.me/yourchannel)"
+    : "New App Download URL (https://...)";
+};
+window.publishAppUpdate = async function(){
+  const version=document.getElementById("updateVersion").value.trim()||String(Date.now());
+  const message=document.getElementById("updateMessage").value.trim();
+  const downloadUrl=document.getElementById("updateDownloadUrl").value.trim();
+  const linkType=(document.getElementById("updateLinkType")||{}).value||"playstore";
+  if(!message||!downloadUrl) return alert("Update message and download URL are required");
+  if(!/^https?:\/\//i.test(downloadUrl)) return alert("Download URL must start with http:// or https://");
+  if(linkType==="playstore" && !/play\.google\.com|market\.android\.com/i.test(downloadUrl)) return alert("Please enter a valid Play Store URL");
+  if(linkType==="telegram" && !/t\.me|telegram\.(me|dog)/i.test(downloadUrl)) return alert("Please enter a valid Telegram URL");
+  appSettings.appUpdate={enabled:true,version,message,downloadUrl,linkType,publishedAt:new Date().toISOString()};
+  await setDoc(doc(db,"settings","app"),{appUpdate:appSettings.appUpdate,updatedAt:serverTimestamp()},{merge:true});
+  renderAppUpdateForm(); await addLog("App Update Published",version); alert("App update published");
+};
+window.unpublishAppUpdate = async function(){
+  appSettings.appUpdate={...(appSettings.appUpdate||{}),enabled:false};
+  await setDoc(doc(db,"settings","app"),{appUpdate:appSettings.appUpdate,updatedAt:serverTimestamp()},{merge:true});
+  renderAppUpdateForm(); await addLog("App Update Unpublished",appSettings.appUpdate.version||""); alert("App update unpublished");
+};
+
+window.sendNotification = async function(){
+  const title = document.getElementById("notifTitle").value.trim();
+  const message = document.getElementById("notifMessage").value.trim();
+  const imageUrl = document.getElementById("notifImageUrl").value.trim();
+  const target = document.getElementById("notifTarget").value;
+  const userId = document.getElementById("notifUserId").value.trim();
+  if(!title || !message) return alert("Title and message required");
+  if(target==="specific" && !userId) return alert("Enter User UID");
+  if(imageUrl && !/^https?:\/\//i.test(imageUrl)) return alert("Image URL must start with http:// or https://");
+  await addDoc(collection(db,"notifications"), {
+    title, message, imageUrl,
+    target: target==="all" ? "all" : userId,
+    createdAt: serverTimestamp(),
+    createdBy: admin.uid,
+    readBy: []
+  });
+  document.getElementById("notifTitle").value = "";
+  document.getElementById("notifMessage").value = "";
+  document.getElementById("notifImageUrl").value = "";
+  await loadNotifications(); renderNotifications();
+  alert("Notification sent");
+};
+function renderNotifications(){
+  const box = document.getElementById("notifList");
+  if(!notifications.length){ box.innerHTML = `<div class="empty">No notifications</div>`; return; }
+  const sorted = [...notifications].sort((a,b)=> (b.createdAt?.seconds||0)-(a.createdAt?.seconds||0));
+  box.innerHTML = sorted.map(n => `
+  <div style="padding:14px 0;border-bottom:1px solid #e2e8f0">
+    <div style="font-weight:800">${esc(n.title)}</div>
+    <div style="color:#475569;font-size:14px;margin:4px 0">${esc(n.message)}</div>
+    ${n.imageUrl ? `<img class="notif-admin-image" src="${esc(n.imageUrl)}" alt="Notification image" loading="lazy" onerror="this.remove()">` : ""}
+    <div style="font-size:12px;color:#94a3b8">${formatDate(n.createdAt)} • ${n.target==="all"?"All users":"User: "+n.target}</div>
+    <button class="btn small red" style="margin-top:8px" onclick="deleteNotif('${n.id}')">Delete</button>
+  </div>`).join("");
+}
+window.deleteNotif = async function(id){
+  if(!confirm("Delete?")) return;
+  await deleteDoc(doc(db,"notifications",id));
+  await loadNotifications(); renderNotifications();
+};
+
+window.clearProcessedDeposits = async function(){
+  const done = deposits.filter(d => ["Approved","Rejected"].includes(String(d.status||"")));
+  if(!done.length) return alert("Nothing to clear");
+  if(!confirm(`Clear ${done.length} processed deposit(s)? Pending deposits are kept. This cannot be undone.`)) return;
+  await Promise.all(done.map(d => deleteDoc(doc(db,"deposits",d.id))));
+  await addLog("Deposits Cleared", `${done.length} processed deposits removed`);
+  await loadDeposits(); renderDeposits(); calculateDashboard();
+  alert("Processed deposits cleared");
+};
+window.clearProcessedWithdrawals = async function(){
+  const done = withdrawals.filter(w => ["Paid","Rejected"].includes(String(w.status||"")));
+  if(!done.length) return alert("Nothing to clear");
+  if(!confirm(`Clear ${done.length} processed withdrawal(s)? Pending/Approved withdrawals are kept. This cannot be undone.`)) return;
+  await Promise.all(done.map(w => deleteDoc(doc(db,"withdrawals",w.id))));
+  await addLog("Withdrawals Cleared", `${done.length} processed withdrawals removed`);
+  await loadWithdrawals(); renderWithdrawals(); calculateDashboard();
+  alert("Processed withdrawals cleared");
+};
+window.toggleClearButtons = function(){
+  const on = localStorage.getItem("adminClearEnabled") === "1";
+  localStorage.setItem("adminClearEnabled", on ? "0" : "1");
+  applyClearButtonVisibility();
+};
+window.applyClearButtonVisibility = function(){
+  const on = localStorage.getItem("adminClearEnabled") === "1";
+  document.querySelectorAll(".clear-toggle").forEach(b => b.style.display = on ? "inline-block" : "none");
+  const t = document.getElementById("clearToggleBtn");
+  if(t) t.textContent = on ? "🧹 Clear Buttons: ON" : "🧹 Clear Buttons: OFF";
+};
+applyClearButtonVisibility();
+
+window.deleteAllNotif = async function(){
+  if(!notifications.length){ alert("No notifications to delete"); return; }
+  if(!confirm("Delete ALL notifications? This cannot be undone.")) return;
+  await Promise.all(notifications.map(n => deleteDoc(doc(db,"notifications",n.id))));
+  await loadNotifications(); renderNotifications();
+  alert("All notifications deleted");
+};
+
+window.setSupportFilter = function(f,b){ supportFilter=f; document.querySelectorAll("#supportPage .filter-btn").forEach(x=>x.classList.remove("active")); if(b)b.classList.add("active"); renderSupport(); };
+function renderSupport(){
+  const box = document.getElementById("supportList");
+  let list = supportFilter==="All" ? supportTickets : supportTickets.filter(t=>t.status===supportFilter);
+  if(!list.length){ box.innerHTML = `<div class="empty">No tickets</div>`; return; }
+  const sorted = [...list].sort((a,b)=> (b.createdAt?.seconds||0)-(a.createdAt?.seconds||0));
+  box.innerHTML = sorted.map(t => `
+  <div class="card" style="margin-bottom:12px">
+    <div style="display:flex;justify-content:space-between;align-items:center">
+      <div style="font-weight:800">${esc(t.subject||"Support")}</div>
+      <span class="status ${statusClass(t.status)}">${esc(t.status)}</span>
+    </div>
+    <div style="font-size:13px;color:#64748b;margin:6px 0">User: ${esc(t.userName||"-")} (${esc(t.userId||"-")})</div>
+    <div style="background:#f8fafc;padding:12px;border-radius:12px;margin:8px 0">${esc(t.message)}</div>
+    ${(t.replies||[]).map(r=>`<div style="background:#e0e7ff;padding:10px;border-radius:10px;margin:6px 0;font-size:13px"><b>Admin:</b> ${esc(r.message)} <span style="color:#64748b;font-size:11px">${formatDate(r.at)}</span></div>`).join("")}
+    <div style="margin-top:10px">
+      <input id="reply_${t.id}" placeholder="Type reply...">
+      <div class="actions" style="margin-top:8px">
+        <button class="btn small" onclick="replyTicket('${t.id}')">Reply</button>
+        <button class="btn small green" onclick="setTicketStatus('${t.id}','In Progress')">In Progress</button>
+        <button class="btn small green" onclick="setTicketStatus('${t.id}','Resolved')">Resolved</button>
+        <button class="btn small gray" onclick="setTicketStatus('${t.id}','Closed')">Close</button>
+      </div>
+    </div>
+  </div>`).join("");
+}
+window.replyTicket = async function(id){
+  const msg = document.getElementById("reply_"+id).value.trim();
+  if(!msg) return;
+  const t = supportTickets.find(x=>x.id===id);
+  const replies = t.replies || [];
+  replies.push({ message: msg, at: new Date().toISOString(), by: admin.uid });
+  await updateDoc(doc(db,"supportTickets",id), { replies, status: t.status==="Pending"?"In Progress":t.status });
+  await loadSupport(); renderSupport();
+};
+window.setTicketStatus = async function(id, status){
+  await updateDoc(doc(db,"supportTickets",id), { status });
+  await loadSupport(); renderSupport(); calculateDashboard();
+};
+
+window.renderReferrals = function(){
+  const box = document.getElementById("referralTable");
+  const search = (document.getElementById("referralSearch")?.value || "").toLowerCase();
+  let referred = users.filter(u => u.referredBy);
+
+  if(search){
+    referred = referred.filter(u => {
+      const referrer = users.find(r => r.id === u.referredBy || r.uid === u.referredBy);
+      return String(u.id||"").toLowerCase().includes(search) ||
+             String(u.email||"").toLowerCase().includes(search) ||
+             String(u.name||"").toLowerCase().includes(search) ||
+             String(referrer?.id||"").toLowerCase().includes(search) ||
+             String(referrer?.email||"").toLowerCase().includes(search) ||
+             String(referrer?.name||"").toLowerCase().includes(search);
+    });
+  }
+
+  if(!referred.length){ box.innerHTML = `<tr><td colspan="6" class="empty">No referrals found</td></tr>`; return; }
+  box.innerHTML = referred.map(u => {
+    const referrer = users.find(r => r.id === u.referredBy || r.uid === u.referredBy);
+    return `<tr>
+      <td>${esc(referrer?.name||"-")}<br><span style="font-size:11px;color:#64748b">${esc(u.referredBy)}</span></td>
+      <td>${esc(referrer?.referralCode||"-")}</td>
+      <td>${esc(u.name||"-")}<br><span style="font-size:11px;color:#64748b">${esc(u.id)}</span></td>
+      <td>${u.firstDepositRewarded ? "Yes" : "No"}</td>
+      <td>${u.firstDepositRewarded ? "₹5 given" : "Pending first deposit"}</td>
+      <td>${formatDate(u.createdAt)}</td>
+    </tr>`;
+  }).join("");
+};
+
+async function loadSettings(){
+  try{
+    const snap = await getDoc(doc(db,"settings","app"));
+    if(!snap.exists()) return;
+    const s = snap.data();
+    document.getElementById("settingUpi").value = s.adminUpiId || s.adminUpi || "";
+    document.getElementById("settingQr").value = s.qrImageUrl || "";
+    document.getElementById("settingMinDeposit").value = s.minDeposit || 100;
+    document.getElementById("settingMinWithdraw").value = s.minWithdraw || 100;
+    document.getElementById("settingSupportImageUrl").value = s.supportImageUrl || "";
+    document.getElementById("settingTelegram").value = s.telegramUrl || s.telegramSupport || "";
+    document.getElementById("settingTelegramImageUrl").value = s.telegramImageUrl || "";
+    document.getElementById("settingAppName").value = s.appName || "TMGame";
+    document.getElementById("settingAnnouncement").value = s.announcement || "";
+
+    appSettings.referralBonus = Number(s.referralBonus != null ? s.referralBonus : 5);
+    appSettings.leaderboardEnabled = s.leaderboardEnabled !== false;
+    appSettings.rank1Bonus = Number(s.rank1Bonus || 0);
+    appSettings.rank2Bonus = Number(s.rank2Bonus || 0);
+    appSettings.weeklyBonusDay = Number(s.weeklyBonusDay != null ? s.weeklyBonusDay : 0);
+    appSettings.monthlyBonusDay = (s.monthlyBonusDay == null || s.monthlyBonusDay === "last") ? "last" : Number(s.monthlyBonusDay);
+    appSettings.socialLinks = Array.isArray(s.socialLinks) ? s.socialLinks : [];
+    appSettings.banners = Array.isArray(s.banners) ? s.banners : [];
+    appSettings.aboutEnabled = s.aboutEnabled === true;
+    appSettings.aboutTitle = s.aboutTitle || "About";
+    appSettings.walletDesign = Number(s.walletDesign || 1);
+    appSettings.appUpdate = Object.assign({enabled:false,version:"",message:"",downloadUrl:""}, s.appUpdate || {});
+    renderAppUpdateForm();
+    document.getElementById("settingReferralBonus").value = appSettings.referralBonus;
+    document.getElementById("settingRank1Bonus").value = appSettings.rank1Bonus;
+    document.getElementById("settingRank2Bonus").value = appSettings.rank2Bonus;
+    document.getElementById("leaderboardToggle").checked = appSettings.leaderboardEnabled;
+    fillMonthlyBonusDayOptions();
+    document.getElementById("settingWeeklyBonusDay").value = String(appSettings.weeklyBonusDay);
+    document.getElementById("settingMonthlyBonusDay").value = String(appSettings.monthlyBonusDay);
+
+    systemFlags.withdrawalEnabled = s.withdrawalEnabled !== false;
+    systemFlags.withdrawalOffReason = s.withdrawalOffReason || "";
+    systemFlags.depositEnabled = s.depositEnabled !== false;
+    systemFlags.depositOffReason = s.depositOffReason || "";
+  }catch(e){}
+}
+window.saveSettings = async function(){
+  const data = {
+    adminUpiId: document.getElementById("settingUpi").value.trim(),
+    qrImageUrl: document.getElementById("settingQr").value.trim(),
+    minDeposit: Number(document.getElementById("settingMinDeposit").value||100),
+    minWithdraw: Number(document.getElementById("settingMinWithdraw").value||100),
+    supportImageUrl: document.getElementById("settingSupportImageUrl").value.trim(),
+    telegramUrl: document.getElementById("settingTelegram").value.trim(),
+    telegramImageUrl: document.getElementById("settingTelegramImageUrl").value.trim(),
+    appName: document.getElementById("settingAppName").value.trim(),
+    announcement: document.getElementById("settingAnnouncement").value,
+    updatedAt: serverTimestamp()
+  };
+  for(const [label,url] of [["Customer Support logo",data.supportImageUrl],["Telegram logo",data.telegramImageUrl]]){
+    if(url && !/^https?:\/\//i.test(url)){ alert(label + " URL must start with http:// or https://"); return; }
+  }
+  await setDoc(doc(db,"settings","app"), data, { merge:true });
+  alert("Settings saved");
+};
+
+function updateSystemUI(){
+  const wBadge = document.getElementById("withdrawalStatusBadge");
+  const wBtn = document.getElementById("withdrawalToggleBtn");
+  const wReason = document.getElementById("withdrawalReasonBox");
+  const wReasonInput = document.getElementById("withdrawalOffReason");
+  if(systemFlags.withdrawalEnabled){
+    wBadge.textContent = "ON"; wBadge.className = "toggle-status on";
+    wBtn.textContent = "Turn OFF"; wBtn.className = "btn small red";
+    wReason.classList.remove("show");
+  } else {
+    wBadge.textContent = "OFF"; wBadge.className = "toggle-status off";
+    wBtn.textContent = "Turn ON"; wBtn.className = "btn small green";
+    wReason.classList.add("show");
+    wReasonInput.value = systemFlags.withdrawalOffReason || "";
+  }
+
+  const dBadge = document.getElementById("depositStatusBadge");
+  const dBtn = document.getElementById("depositToggleBtn");
+  const dReason = document.getElementById("depositReasonBox");
+  const dReasonInput = document.getElementById("depositOffReason");
+  if(systemFlags.depositEnabled){
+    dBadge.textContent = "ON"; dBadge.className = "toggle-status on";
+    dBtn.textContent = "Turn OFF"; dBtn.className = "btn small red";
+    dReason.classList.remove("show");
+  } else {
+    dBadge.textContent = "OFF"; dBadge.className = "toggle-status off";
+    dBtn.textContent = "Turn ON"; dBtn.className = "btn small green";
+    dReason.classList.add("show");
+    dReasonInput.value = systemFlags.depositOffReason || "";
+  }
+}
+
+window.toggleSystemFlag = function(type){
+  if(type === "withdrawal"){
+    systemFlags.withdrawalEnabled = !systemFlags.withdrawalEnabled;
+    if(systemFlags.withdrawalEnabled) systemFlags.withdrawalOffReason = "";
+  } else if(type === "deposit"){
+    systemFlags.depositEnabled = !systemFlags.depositEnabled;
+    if(systemFlags.depositEnabled) systemFlags.depositOffReason = "";
+  }
+  updateSystemUI();
+};
+
+window.saveSystemSettings = async function(){
+  systemFlags.withdrawalOffReason = document.getElementById("withdrawalOffReason").value.trim();
+  systemFlags.depositOffReason = document.getElementById("depositOffReason").value.trim();
+
+  await setDoc(doc(db,"settings","app"), {
+    withdrawalEnabled: systemFlags.withdrawalEnabled,
+    withdrawalOffReason: systemFlags.withdrawalOffReason,
+    depositEnabled: systemFlags.depositEnabled,
+    depositOffReason: systemFlags.depositOffReason,
+    updatedAt: serverTimestamp()
+  }, { merge: true });
+
+  await addLog("System Settings Updated", 
+    `Withdrawal: ${systemFlags.withdrawalEnabled ? "ON" : "OFF"} | Deposit: ${systemFlags.depositEnabled ? "ON" : "OFF"}`);
+  alert("System settings saved successfully");
+  updateSystemUI();
+};
+
+async function addLog(action, details){
+  try{ await addDoc(collection(db,"adminLogs"), { action, details, adminUid:admin.uid, adminEmail:admin.email, createdAt:serverTimestamp() }); }catch(e){}
+}
+
+async function loadLogs(){
+  const box = document.getElementById("logsTable");
+  try{
+    const q = query(collection(db,"adminLogs"), orderBy("createdAt", "desc"), limit(80));
+    const snap = await getDocs(q);
+    let logs = [];
+    snap.forEach(d => logs.push({id:d.id, ...d.data()}));
+
+    if(!logs.length){
+      box.innerHTML = `<tr><td colspan="4" class="empty">No activity logs yet</td></tr>`;
+      return;
+    }
+
+    box.innerHTML = logs.map(l => `
+      <tr>
+        <td>${esc(l.action)}</td>
+        <td>${esc(l.adminEmail || "-")}</td>
+        <td>${esc(l.details || "-")}</td>
+        <td>${formatDate(l.createdAt)}</td>
+      </tr>`).join("");
+  }catch(e){
+    console.error("loadLogs error:", e);
+    box.innerHTML = `<tr><td colspan="4" class="empty">Unable to load activity logs</td></tr>`;
+  }
+}
+
+window.openPage = function(id, btn){
+  document.querySelectorAll(".page").forEach(p=>p.classList.remove("active"));
+  document.getElementById(id).classList.add("active");
+  document.querySelectorAll(".side-btn").forEach(b=>b.classList.remove("active"));
+  if(btn) btn.classList.add("active");
+  document.getElementById("sidebar").classList.remove("open");
+};
+
+window.openPageById = function(id){ const btn = [...document.querySelectorAll(".side-btn")].find(b=>b.getAttribute("onclick")?.includes(id)); openPage(id,btn); };
+window.toggleSidebar = function(){ document.getElementById("sidebar").classList.toggle("open"); };
+window.logoutAdmin = async function(){ await signOut(auth); };
+window.copyText = async function(t){ try{ await navigator.clipboard.writeText(t); alert("Copied"); }catch(e){} };
+
+function clearTournamentForm(){
+  ["tName","tMode","tMap","tDateTime","tRegistrationEnd","tMatchEnding","tEntryFee","tPrize","tSlots","tCustom1","tCustom2","tBanner","tRoomId","tRoomPass","tRoomRelease","tRules","tPrizeDistribution"].forEach(id=>{
+    const el=document.getElementById(id); if(el) el.value="";
+  });
+  document.getElementById("tEntryType").value="Free";
+  document.getElementById("tStatus").value="Upcoming";
+  document.getElementById("tMatchOpen").value="true";
+}
+function esc(v){ return String(v??"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;"); }
+function statusClass(s){ return String(s||"Pending").toLowerCase().replace(/\s+/g,"-"); }
+function formatDate(v){ if(!v) return "-"; if(v.toDate) return v.toDate().toLocaleString("en-IN"); const d=new Date(v); return isNaN(d)?String(v):d.toLocaleString("en-IN"); }
+</script>
+<script>
+/* Branded visual replacement for the existing informational alert() calls. */
+(function(){
+  const pending = [];
+  let active = false;
+  function showNext(){
+    if(active || !pending.length) return;
+    active = true;
+    const message = pending.shift();
+    const backdrop = document.createElement("div");
+    backdrop.className = "tm-alert-bg";
+    const card = document.createElement("div");
+    card.className = "tm-alert-card";
+    const kicker = document.createElement("div");
+    kicker.className = "tm-alert-kicker";
+    kicker.textContent = "TMGame Admin";
+    const text = document.createElement("div");
+    text.className = "tm-alert-message";
+    text.textContent = String(message ?? "");
+    const footer = document.createElement("div");
+    footer.className = "tm-alert-footer";
+    const ok = document.createElement("button");
+    ok.className = "tm-alert-ok";
+    ok.type = "button";
+    ok.textContent = "OK";
+    footer.appendChild(ok);
+    card.append(kicker,text,footer);
+    backdrop.appendChild(card);
+    document.body.appendChild(backdrop);
+    const close = () => {
+      backdrop.remove();
+      active = false;
+      showNext();
+    };
+    ok.addEventListener("click",close);
+    backdrop.addEventListener("click",event => { if(event.target === backdrop) close(); });
+    ok.focus();
+  }
+  window.alert = function(message){
+    pending.push(message);
+    showNext();
+  };
+})();
+</script>
+</body>
+</html>
